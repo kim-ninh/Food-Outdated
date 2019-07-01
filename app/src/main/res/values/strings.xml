@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Food Outdated</string>
+    <string name="title_activity_food_list">FoodListActivity</string>
+</resources>
