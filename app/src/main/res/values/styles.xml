@@ -17,4 +17,20 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="ProductName">
+        <item name="android:textSize">@dimen/font_large</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+    <style name="ProductExpiry">
+        <item name="android:textSize">@dimen/font_normal</item>
+        <item name="android:textColor">@color/green</item>
+    </style>
+    <style name="ProductExpiryWarning">
+        <item name="android:textSize">@dimen/font_normal</item>
+        <item name="android:textColor">@color/yellow</item>
+    </style>
+    <style name="ProductExpiryDanger">
+        <item name="android:textSize">@dimen/font_normal</item>
+        <item name="android:textColor">@color/red</item>
+    </style>
 </resources>
