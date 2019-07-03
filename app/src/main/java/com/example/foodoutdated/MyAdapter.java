@@ -1,9 +1,14 @@
 package com.example.foodoutdated;
 
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+
 
 import java.util.List;
 
@@ -44,8 +49,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     public void onBindViewHolder(MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-//        holder.linearLayout.setText(mDataset[position]);
 
+        LinearLayout linearLayout = holder.linearLayout;
+        TextView txtName = linearLayout.findViewById(R.id.product_name);
+        TextView txtEpiry = linearLayout.findViewById(R.id.product_expiry);
+        ImageView imageThumbnail = linearLayout.findViewById(R.id.product_thumbnail);
+
+        Product product = mDataset.get(position);
+
+        txtName.setText(product.getName());
+        txtEpiry.setText(DateFormat.format(Utils.DATE_PATTERN_VN, product.getExpiry()));
+        imageThumbnail.setImageURI(Uri.parse(product.getThumbnail()));
     }
 
     // Return the size of your dataset (invoked by the layout manager)

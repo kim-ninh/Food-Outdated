@@ -2,6 +2,7 @@ package com.example.foodoutdated;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,27 +19,29 @@ public class FoodListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
-//    private String[] myDataset = {"Product 1", "Product 2", "Product 3", "Product 4"};
-    private List<Product> myDataset = new ArrayList<>();
 
+    private List<Product> myDataset = new ArrayList<>();
+    private static final int ADD_PRODUCT_REQUEST = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_list);
 
-        final Intent intent =  new Intent(this, MainActivity.class);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        final Intent intent =  new Intent(this, AddProductActivity.class);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(intent);
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
+                startActivityForResult(intent, ADD_PRODUCT_REQUEST);
+
             }
         });
 
 
-        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView = findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -54,4 +57,21 @@ public class FoodListActivity extends AppCompatActivity {
         recyclerView.setAdapter(mAdapter);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == ADD_PRODUCT_REQUEST){
+            if (resultCode == RESULT_OK){
+                Product newProduct = null;
+                if (data != null) {
+                    newProduct = data.getParcelableExtra("new_product");
+                    myDataset.add(newProduct);
+                    recyclerView.notify();
+
+                    Snackbar.make(recyclerView, "Add successful!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                }
+
+            }
+        }
+    }
 }

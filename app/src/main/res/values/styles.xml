@@ -8,7 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
@@ -21,16 +21,30 @@
         <item name="android:textSize">@dimen/font_large</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
+
     <style name="ProductExpiry">
         <item name="android:textSize">@dimen/font_normal</item>
         <item name="android:textColor">@color/green</item>
     </style>
+
     <style name="ProductExpiryWarning">
         <item name="android:textSize">@dimen/font_normal</item>
         <item name="android:textColor">@color/yellow</item>
     </style>
+
     <style name="ProductExpiryDanger">
         <item name="android:textSize">@dimen/font_normal</item>
         <item name="android:textColor">@color/red</item>
     </style>
+
+    <style name="AppTheme.NoActionBar.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.NoActionBar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
 </resources>

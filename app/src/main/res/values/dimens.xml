@@ -14,4 +14,5 @@
     <dimen name="spacing_small">8dp</dimen>
     <dimen name="spacing_tiny">4dp</dimen>
 
+    <dimen name="sticky_button_height">64dp</dimen>
 </resources>

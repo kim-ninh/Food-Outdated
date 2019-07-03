@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="expiryDate_selection">
+        <item>@string/pick_a_date</item>
+        <item>@string/scan_from_camera</item>
+    </string-array>
+</resources>

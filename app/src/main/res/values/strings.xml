@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Food Outdated</string>
     <string name="title_activity_food_list">FoodListActivity</string>
+    <string name="product_image_desc">Product image</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="pick_a_date">Pick a date</string>
+    <string name="scan_from_camera">Scan from camera</string>
 </resources>
