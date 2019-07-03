@@ -5,4 +5,7 @@
     <string name="title_activity_main2">Main2Activity</string>
     <string name="pick_a_date">Pick a date</string>
     <string name="scan_from_camera">Scan from camera</string>
+    <string name="error_message_empty_name">Product name is empty, please give it a name</string>
+    <string name="error_message_empty_date">Expiry date is empty, pick a date please.</string>
+    <string name="error_message_empty_photo">Please take a photo or pick in gallery</string>
 </resources>

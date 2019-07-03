@@ -1,5 +1,6 @@
 package com.ninh.foodoutdated;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.ninh.foodoutdated.custom.view.ImageHolderView;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -66,13 +68,23 @@ public class AddProductActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.item_add:
-                Toast.makeText(this, "Add click", Toast.LENGTH_LONG).show();
+                if (validate()){
+                    openPreviousActivity();
+                }
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    private void openPreviousActivity() {
+        Intent data = new Intent();
+        data.putExtra("new_product", getProduct());
+        setResult(Activity.RESULT_OK, data);
+        AddProductActivity.this.finish();
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -143,4 +155,46 @@ public class AddProductActivity extends AppCompatActivity
 
     }
 
+    private Product getProduct(){
+        Product product = null;
+        try {
+            String productName = txtName.getText().toString();
+            String expiryDate = txtExpiry.getText().toString();
+            String photoUri = productImageHolder.getImageUri();
+            Date expiry = new SimpleDateFormat(Utils.DATE_PATTERN_VN).parse(expiryDate);
+            product = new Product(productName, expiry, photoUri);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return product;
+    }
+
+    private boolean validate(){
+        boolean isValid = true;
+
+        String ProductName = txtName.getText().toString();
+        String expiryDate = txtExpiry.getText().toString();
+        String photoUri = productImageHolder.getImageUri();
+
+        txtName.setError(null);
+
+        if (ProductName.isEmpty() && isValid){
+            Toast.makeText(this, R.string.error_message_empty_name, Toast.LENGTH_LONG).show();
+            isValid = false;
+        }
+
+        if (expiryDate.isEmpty() && isValid){
+            Toast.makeText(this, R.string.error_message_empty_date,Toast.LENGTH_LONG).show();
+            isValid = false;
+        }
+
+        if (photoUri.isEmpty() && isValid){
+            Toast.makeText(this, R.string.error_message_empty_photo, Toast.LENGTH_LONG).show();
+            isValid = false;
+        }
+
+        return isValid;
+    }
 }

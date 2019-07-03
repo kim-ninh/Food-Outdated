@@ -84,8 +84,8 @@ public class FoodListActivity extends AppCompatActivity {
                 if (data != null) {
                     newProduct = data.getParcelableExtra("new_product");
                     myDataset.add(newProduct);
-                    recyclerView.notify();
-
+                    int size = myDataset.size();
+                    recyclerView.getAdapter().notifyItemInserted(size - 1);
                     Snackbar.make(recyclerView, "Add successful!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
                 }
