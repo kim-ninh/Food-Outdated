@@ -14,6 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -21,6 +26,7 @@ import java.util.List;
 
 public class FoodListActivity extends AppCompatActivity {
 
+    private ActionMode actionMode;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -33,6 +39,42 @@ public class FoodListActivity extends AppCompatActivity {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
+
+    private ActionMode.Callback actionModeCallBack = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.delete_context, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()){
+                case R.id.item_delete:
+                    //TODO: delete selected item
+                    return true;
+                default: return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            actionMode = null;
+
+            //TODO: call this when select the first item
+//            if (actionMode == null)
+//            {
+//                actionMode = startActionMode(actionModeCallBack);
+//            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
