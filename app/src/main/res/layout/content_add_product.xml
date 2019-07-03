@@ -68,7 +68,7 @@
                 android:hint="Product name"
                 android:inputType="textPersonName" />
 
-            <com.example.foodoutdated.custom.view.DateEditText
+            <com.ninh.foodoutdated.custom.view.DateEditText
                 android:id="@+id/txtExpiry"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -101,12 +101,12 @@
 
             <!--</RelativeLayout>-->
 
-            <com.example.foodoutdated.custom.view.ImageHolderView
+            <com.ninh.foodoutdated.custom.view.ImageHolderView
                 android:id="@+id/productImageHolder"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-            </com.example.foodoutdated.custom.view.ImageHolderView>
+            </com.ninh.foodoutdated.custom.view.ImageHolderView>
 
         </LinearLayout>
     </ScrollView>

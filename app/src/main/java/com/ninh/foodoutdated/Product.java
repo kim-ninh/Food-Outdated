@@ -1,4 +1,4 @@
-package com.example.foodoutdated;
+package com.ninh.foodoutdated;
 
 import android.os.Parcel;
 import android.os.Parcelable;

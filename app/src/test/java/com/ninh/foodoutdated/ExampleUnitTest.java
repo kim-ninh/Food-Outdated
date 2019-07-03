@@ -1,4 +1,4 @@
-package com.example.foodoutdated;
+package com.ninh.foodoutdated;
 
 import org.junit.Test;
 

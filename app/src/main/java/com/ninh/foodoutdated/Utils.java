@@ -1,4 +1,4 @@
-package com.example.foodoutdated;
+package com.ninh.foodoutdated;
 
 public interface Utils {
     public static final String DATE_PATTERN_VN = "dd/MM/yyyy";

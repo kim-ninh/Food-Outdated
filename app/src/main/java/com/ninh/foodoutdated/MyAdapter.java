@@ -1,4 +1,4 @@
-package com.example.foodoutdated;
+package com.ninh.foodoutdated;
 
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;

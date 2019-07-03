@@ -1,4 +1,4 @@
-package com.example.foodoutdated;
+package com.ninh.foodoutdated;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -17,8 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.foodoutdated.custom.view.DateEditText;
-import com.example.foodoutdated.custom.view.ImageHolderView;
+import com.ninh.foodoutdated.custom.view.DateEditText;
+import com.ninh.foodoutdated.custom.view.ImageHolderView;
 
 import java.io.File;
 import java.io.IOException;

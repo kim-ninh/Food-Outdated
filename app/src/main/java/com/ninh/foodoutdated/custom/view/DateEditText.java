@@ -1,4 +1,4 @@
-package com.example.foodoutdated.custom.view;
+package com.ninh.foodoutdated.custom.view;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.widget.DatePicker;
 
-import com.example.foodoutdated.Utils;
+import com.ninh.foodoutdated.Utils;
 
 import java.util.Calendar;
 

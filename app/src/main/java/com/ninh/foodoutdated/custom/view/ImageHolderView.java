@@ -1,4 +1,4 @@
-package com.example.foodoutdated.custom.view;
+package com.ninh.foodoutdated.custom.view;
 
 import android.content.Context;
 import android.net.Uri;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
-import com.example.foodoutdated.R;
+import com.ninh.foodoutdated.R;
 
 public class ImageHolderView extends RelativeLayout
     implements View.OnClickListener {

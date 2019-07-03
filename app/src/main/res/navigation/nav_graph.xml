@@ -7,12 +7,12 @@
 
     <activity
         android:id="@+id/foodListActivity"
-        android:name="com.example.foodoutdated.FoodListActivity"
+        android:name="com.ninh.foodoutdated.FoodListActivity"
         android:label="activity_food_list"
         tools:layout="@layout/activity_food_list" />
     <activity
         android:id="@+id/addProductActivity"
-        android:name="com.example.foodoutdated.AddProductActivity"
+        android:name="com.ninh.foodoutdated.AddProductActivity"
         android:label="activity_add_product"
         tools:layout="@layout/activity_add_product" />
 </navigation>
