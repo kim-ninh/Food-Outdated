@@ -81,5 +81,48 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             super(v);
             linearLayout = v;
         }
+
+        public ItemDetailsLookup.ItemDetails<Long> getItemDetails() {
+            ItemDetailsLookup.ItemDetails<Long> obj = new ItemDetailsLookup.ItemDetails<Long>() {
+                @Override
+                public int getPosition() {
+                    return getAdapterPosition();
+                }
+
+                @Nullable
+                @Override
+                public Long getSelectionKey() {
+                    return getItemId();
+                }
+            };
+
+            return obj;
+        }
+
+        public void bind(Product product, boolean isActived) {
+            TextView txtName = linearLayout.findViewById(R.id.product_name);
+            TextView txtEpiry = linearLayout.findViewById(R.id.product_expiry);
+            ImageView imageThumbnail = linearLayout.findViewById(R.id.product_thumbnail);
+
+            txtName.setText(product.getName());
+            txtEpiry.setText(DateFormat.format(Utils.DATE_PATTERN_VN, product.getExpiry()));
+            imageThumbnail.setImageURI(Uri.parse(product.getThumbnail()));
+            linearLayout.setActivated(isActived);
+
+            int greenColor = context.getResources().getColor(R.color.green);
+            int redColor = context.getResources().getColor(R.color.red);
+            int yellowColor = context.getResources().getColor(R.color.yellow);
+            switch (product.getState()) {
+                case NEW:
+                    txtEpiry.setTextColor(greenColor);
+                    break;
+                case EXPIRIED:
+                    txtEpiry.setTextColor(redColor);
+                    break;
+                case NEARLY_EXPIRY:
+                    txtEpiry.setTextColor(yellowColor);
+                    break;
+            }
+        }
     }
 }

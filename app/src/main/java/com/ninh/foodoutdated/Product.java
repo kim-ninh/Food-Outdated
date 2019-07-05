@@ -3,15 +3,37 @@ package com.ninh.foodoutdated;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class Product implements Parcelable {
     private String name;
     private Date expiry;        //date format: yyyy-mm-dd
     private String thumbnail;
+    private int remainDayBeginWarn = 15;
+
+    // 30 day - 15 day - 0day
+    // new - nearly expiry - expired
+    public EXPIRY_STATE getState() {
+        EXPIRY_STATE state = EXPIRY_STATE.NEW;
+        Calendar now = Calendar.getInstance();
+        int elapsedDate = DateUtils.substract(expiry, now.getTime());
+
+        if (0 < elapsedDate && elapsedDate <= remainDayBeginWarn) {
+            state = EXPIRY_STATE.NEARLY_EXPIRY;
+        } else if (elapsedDate <= 0) {
+            state = EXPIRY_STATE.EXPIRIED;
+        }
+        return state;
+    }
+
+    public enum EXPIRY_STATE {
+        EXPIRIED,
+        NEARLY_EXPIRY,
+        NEW,
+    }
 
     // constructor
     public Product() {
