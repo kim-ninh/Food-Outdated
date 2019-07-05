@@ -9,6 +9,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class Product implements Parcelable {
+    private static long lastID = 99;
+    private long id;
     private String name;
     private Date expiry;        //date format: yyyy-mm-dd
     private String thumbnail;
@@ -43,6 +45,8 @@ public class Product implements Parcelable {
     }
 
     public Product(String name, Date expiry, String thumbnail) {
+        this.id = lastID + 1;
+        lastID++;
         this.name = name;
         this.expiry = expiry;
         this.thumbnail = thumbnail;
@@ -74,16 +78,24 @@ public class Product implements Parcelable {
         this.thumbnail = thumbnail;
     }
 
-
     // Parcelable implement
     protected Product(Parcel in) {
         try {
+            id = in.readLong();
             name = in.readString();
             thumbnail = in.readString();
             expiry = new SimpleDateFormat(Utils.DATE_PATTERN_VN).parse(in.readString());
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public static final Creator<Product> CREATOR = new Creator<Product>() {
@@ -105,6 +117,7 @@ public class Product implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
         dest.writeString(name);
         dest.writeString(thumbnail);
         dest.writeString(new SimpleDateFormat(Utils.DATE_PATTERN_VN).format(expiry));

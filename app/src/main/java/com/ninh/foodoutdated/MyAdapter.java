@@ -1,7 +1,6 @@
 package com.ninh.foodoutdated;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -14,12 +13,17 @@ import android.widget.TextView;
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.SelectionTracker;
 
+import com.bumptech.glide.Glide;
+import com.orhanobut.logger.Logger;
+
 import java.util.List;
+import java.util.Random;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private List<Product> mDataset;
     private static Context context;
     private SelectionTracker<Long> tracker = null;
+    private static Random random = new Random();
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public MyAdapter(List<Product> myDataset) {
@@ -43,7 +47,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         Product product = mDataset.get(position);
         if (tracker != null) {
-            holder.bind(product, tracker.isSelected((long) position));
+            holder.bind(product, tracker.isSelected(product.getId()));
         }
     }
 
@@ -51,6 +55,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                      int viewType) {
+
         // create a new view
         LinearLayout v = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.product_item, parent, false);
@@ -61,7 +66,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     @Override
     public long getItemId(int position) {
-        return (long) position;
+        return mDataset.get(position).getId();
     }
 
 
@@ -99,15 +104,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             return obj;
         }
 
-        public void bind(Product product, boolean isActived) {
+        public void bind(Product product, boolean isActive) {
             TextView txtName = linearLayout.findViewById(R.id.product_name);
             TextView txtEpiry = linearLayout.findViewById(R.id.product_expiry);
             ImageView imageThumbnail = linearLayout.findViewById(R.id.product_thumbnail);
 
             txtName.setText(product.getName());
             txtEpiry.setText(DateFormat.format(Utils.DATE_PATTERN_VN, product.getExpiry()));
-            imageThumbnail.setImageURI(Uri.parse(product.getThumbnail()));
-            linearLayout.setActivated(isActived);
+
+
+            Glide.with(context)
+                    .load(product.getThumbnail())
+                    .into(imageThumbnail);
+            Logger.i("image path: %s", product.getThumbnail());
+            linearLayout.setActivated(isActive);
 
             int greenColor = context.getResources().getColor(R.color.green);
             int redColor = context.getResources().getColor(R.color.red);

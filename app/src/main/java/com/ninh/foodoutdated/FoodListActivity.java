@@ -28,9 +28,7 @@ import androidx.recyclerview.selection.StorageStrategy;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class FoodListActivity extends AppCompatActivity {
 
@@ -41,7 +39,8 @@ public class FoodListActivity extends AppCompatActivity {
     private SelectionTracker tracker;
     private boolean actionModeVisible = false;
 
-    private List<Product> myDataset = new ArrayList<>();
+    private ProductDAO productDAO = new ProductDAO();
+
     private static final int ADD_PRODUCT_REQUEST = 1;
     private static final int PERMISSION_REQUEST = 484;
     String[] permissions = {
@@ -73,9 +72,13 @@ public class FoodListActivity extends AppCompatActivity {
                     Iterator it = selection.iterator();
                     while (it.hasNext()) {
                         long id = (long) it.next();
-                        myDataset.remove((int) id);
-                        recyclerView.getAdapter().notifyItemRemoved((int) id);
+                        int adapterIndex = productDAO.deleteById(id);
+                        if (adapterIndex != -1) {
+                            recyclerView.getAdapter().notifyItemRemoved(adapterIndex);
+                        }
                     }
+
+                    Logger.i("%s", selection.toString());
                     actionMode.finish();
                     return true;
                 default:
@@ -120,11 +123,12 @@ public class FoodListActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        mAdapter = new MyAdapter(myDataset);
+        mAdapter = new MyAdapter(productDAO.loadAll());
         ((MyAdapter) mAdapter).setContext(this);
         recyclerView.setAdapter(mAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(this,
                 DividerItemDecoration.VERTICAL));
+        recyclerView.setHasFixedSize(true);
 
         tracker = new SelectionTracker.Builder<>(
                 "my-selection-id",
@@ -180,10 +184,10 @@ public class FoodListActivity extends AppCompatActivity {
                 Product newProduct = null;
                 if (data != null) {
                     newProduct = data.getParcelableExtra("new_product");
-                    myDataset.add(newProduct);
-                    int size = myDataset.size();
+                    productDAO.add(newProduct);
+                    int size = productDAO.size();
                     recyclerView.getAdapter().notifyItemInserted(size - 1);
-                    Snackbar.make(recyclerView, "Add successful!", Snackbar.LENGTH_LONG)
+                    Snackbar.make(recyclerView, "Add successful!", Snackbar.LENGTH_SHORT)
                         .setAction("Action", null).show();
                 }
 
