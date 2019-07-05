@@ -11,17 +11,25 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.recyclerview.selection.Selection;
+import androidx.recyclerview.selection.SelectionPredicates;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
+
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.Logger;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class FoodListActivity extends AppCompatActivity {
@@ -30,6 +38,8 @@ public class FoodListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private SelectionTracker tracker;
+    private boolean actionModeVisible = false;
 
     private List<Product> myDataset = new ArrayList<>();
     private static final int ADD_PRODUCT_REQUEST = 1;
@@ -58,31 +68,40 @@ public class FoodListActivity extends AppCompatActivity {
             switch (item.getItemId()){
                 case R.id.item_delete:
                     //TODO: delete selected item
+                    Selection selection = tracker.getSelection();
+
+                    Iterator it = selection.iterator();
+                    while (it.hasNext()) {
+                        long id = (long) it.next();
+                        myDataset.remove((int) id);
+                        recyclerView.getAdapter().notifyItemRemoved((int) id);
+                    }
+                    actionMode.finish();
                     return true;
-                default: return false;
+                default:
+                    return false;
             }
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             actionMode = null;
-
-            //TODO: call this when select the first item
-//            if (actionMode == null)
-//            {
-//                actionMode = startActionMode(actionModeCallBack);
-//            }
+            actionModeVisible = false;
+            clearAllSelection();
         }
     };
+
+    private void clearAllSelection() {
+        if (tracker.getSelection().size() != 0) {
+            tracker.clearSelection();
+        }
+    }
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_list);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         final Intent intent =  new Intent(this, AddProductActivity.class);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -97,23 +116,59 @@ public class FoodListActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.my_recycler_view);
 
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        recyclerView.setHasFixedSize(true);
-
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // specify an adapter (see also next example)
-
         mAdapter = new MyAdapter(myDataset);
+        ((MyAdapter) mAdapter).setContext(this);
         recyclerView.setAdapter(mAdapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(this,
+                DividerItemDecoration.VERTICAL));
+
+        tracker = new SelectionTracker.Builder<>(
+                "my-selection-id",
+                recyclerView,
+                new MyItemKeyProvider(recyclerView),
+                new MyDetailsLookup(recyclerView),
+                StorageStrategy.createLongStorage())
+                .withSelectionPredicate(SelectionPredicates.<Long>createSelectAnything())
+                .build();
+
+        tracker.addObserver(new SelectionTracker.SelectionObserver() {
+
+
+            @Override
+            public void onItemStateChanged(@NonNull Object key, boolean selected) {
+                super.onItemStateChanged(key, selected);
+
+                int totalSelection = tracker.getSelection().size();
+
+                if (!actionModeVisible && totalSelection == 1) {
+                    actionMode = startSupportActionMode(actionModeCallBack);
+                    actionModeVisible = true;
+                }
+
+
+                if (actionMode == null)
+                    return;
+
+                if (totalSelection == 0) {
+                    actionMode.finish();
+                    return;
+                }
+                actionMode.setTitle(String.format("%d selected", totalSelection));
+            }
+
+        });
+
+        ((MyAdapter) mAdapter).setTracker(tracker);
 
         if (! checkPermissionGranted())
         {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST);
         }
+        Logger.addLogAdapter(new AndroidLogAdapter());
     }
 
     @Override

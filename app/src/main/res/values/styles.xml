@@ -46,5 +46,20 @@
 
     <style name="AppTheme.NoActionBar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="MyActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
+        <item name="background">@color/colorPrimary</item>
+        <item name="backgroundSplit">?attr/actionModeSplitBackground</item>
+        <item name="height">?attr/actionBarSize</item>
+        <item name="titleTextStyle">@style/TextAppearance.AppCompat.Widget.ActionMode.Title</item>
+        <item name="subtitleTextStyle">@style/TextAppearance.AppCompat.Widget.ActionMode.Subtitle
+        </item>
+        <item name="closeItemLayout">@layout/abc_action_mode_close_item_material</item>
+    </style>
 
+    <style name="ActionModeTheme" parent="AppTheme">
+        <item name="actionModeStyle">@style/MyActionModeStyle</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_clear_black_24dp</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+    </style>
 </resources>

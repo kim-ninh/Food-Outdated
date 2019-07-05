@@ -4,14 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="96dp"
     android:layout_width="match_parent"
-    android:layout_marginTop="@dimen/spacing_normal"
+    android:background="@drawable/recycler_view_item_bg"
     >
 
     <ImageView
         android:id="@+id/product_thumbnail"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/spacing_normal"
         android:layout_marginRight="@dimen/spacing_normal"
         android:layout_weight="1"
         android:scaleType="centerCrop"

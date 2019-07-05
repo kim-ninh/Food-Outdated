@@ -31,7 +31,9 @@
 
         <activity android:name="com.ninh.foodoutdated.AddProductActivity" />
         <activity android:name="com.ninh.foodoutdated.MainActivity" />
-        <activity android:name="com.ninh.foodoutdated.FoodListActivity">
+        <activity
+            android:name="com.ninh.foodoutdated.FoodListActivity"
+            android:theme="@style/ActionModeTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
