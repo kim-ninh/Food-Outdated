@@ -40,6 +40,7 @@ public class ImageHolderView extends RelativeLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         imageView = this.findViewById(R.id.imageView);
+        imageView.setTag("");
         imageViewDelete = this.findViewById(R.id.imageViewDelete);
         imageViewDelete.setOnClickListener(this);
     }
@@ -54,6 +55,7 @@ public class ImageHolderView extends RelativeLayout
 
     public void setImageUri(Uri uri)
     {
+        this.setVisibility(VISIBLE);
         imageView.setImageURI(uri);
         imageView.setTag(uri.toString());
     }
