@@ -39,7 +39,7 @@ public class FoodListActivity extends AppCompatActivity {
     private SelectionTracker tracker;
     private boolean actionModeVisible = false;
 
-    private ProductDAO productDAO = new ProductDAO();
+    private ProductDAO productDAO;
 
     private static final int ADD_PRODUCT_REQUEST = 1;
     private static final int PERMISSION_REQUEST = 484;
@@ -105,7 +105,7 @@ public class FoodListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_list);
-
+        Logger.addLogAdapter(new AndroidLogAdapter());
         final Intent intent =  new Intent(this, AddProductActivity.class);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -115,7 +115,7 @@ public class FoodListActivity extends AppCompatActivity {
 
             }
         });
-
+        productDAO = new ProductDAO(FoodListActivity.this);
 
         recyclerView = findViewById(R.id.my_recycler_view);
 
@@ -172,7 +172,7 @@ public class FoodListActivity extends AppCompatActivity {
         {
             ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST);
         }
-        Logger.addLogAdapter(new AndroidLogAdapter());
+
     }
 
     @Override
