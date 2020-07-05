@@ -6,12 +6,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 data class Product(
+    val id: Long = ++lastID,
     val name: String = "",
     val expiry: Date = Date(),      //date format: yyyy-mm-dd
     val thumbnail: String = ""
 ) : Parcelable {
-
-    var id: Long = 0
 
     private val remainDayBeginWarn = 15
 
@@ -34,20 +33,14 @@ data class Product(
         EXPIRED, NEARLY_EXPIRY, NEW
     }
 
-    init {
-        id = ++lastID
-    }
-
     // Parcelable implement
     protected constructor(`in`: Parcel)
             : this(
+        id = `in`.readLong(),
         name = `in`.readString()!!,
         expiry = SimpleDateFormat(Utils.DATE_PATTERN_VN).parse(`in`.readString()!!)!!,
         thumbnail = `in`.readString()!!
-    ) {
-        lastID--
-        id = `in`.readLong()
-    }
+    )
 
     override fun describeContents(): Int {
         return 0
@@ -56,20 +49,20 @@ data class Product(
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeLong(id)
         dest.writeString(name)
-        dest.writeString(thumbnail)
         dest.writeString(SimpleDateFormat(Utils.Companion.DATE_PATTERN_VN).format(expiry))
+        dest.writeString(thumbnail)
     }
 
-    companion object {
+    companion object CREATOR: Parcelable.Creator<Product>{
         private var lastID: Long = 99
-        val CREATOR: Parcelable.Creator<Product> = object : Parcelable.Creator<Product> {
-            override fun createFromParcel(`in`: Parcel): Product? {
-                return Product(`in`)
-            }
 
-            override fun newArray(size: Int): Array<Product?> {
-                return arrayOfNulls(size)
-            }
+        override fun createFromParcel(source: Parcel): Product {
+            return Product(source)
         }
+
+        override fun newArray(size: Int): Array<Product?> {
+            return arrayOfNulls(size)
+        }
+
     }
 }

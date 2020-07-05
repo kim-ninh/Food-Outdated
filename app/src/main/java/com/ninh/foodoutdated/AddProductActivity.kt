@@ -142,7 +142,7 @@ class AddProductActivity : AppCompatActivity(), View.OnClickListener {
                 val expiryDate = txtExpiry!!.text.toString()
                 val photoUri = productCloseableImage!!.imageUri
                 val expiry = SimpleDateFormat(Utils.DATE_PATTERN_VN).parse(expiryDate)
-                product = Product(productName, expiry, photoUri)
+                product = Product(name = productName, expiry = expiry!!, thumbnail = photoUri)
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
