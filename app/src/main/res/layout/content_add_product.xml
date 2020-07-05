@@ -101,12 +101,12 @@
 
             <!--</RelativeLayout>-->
 
-            <com.ninh.foodoutdated.custom.view.ImageHolderView
+            <com.ninh.foodoutdated.custom.view.CloseableImageView
                 android:id="@+id/productImageHolder"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-            </com.ninh.foodoutdated.custom.view.ImageHolderView>
+            </com.ninh.foodoutdated.custom.view.CloseableImageView>
 
         </LinearLayout>
     </ScrollView>
