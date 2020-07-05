@@ -6,10 +6,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.Nullable;
-import android.support.v4.content.FileProvider;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -143,15 +143,16 @@ public class AddProductActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-       if (requestCode == OPEN_GALLERY_REQUEST && resultCode == RESULT_OK){
-           Uri imageUri = Uri.parse(data.getDataString());
-           String str = imageUri.getPath();
-           productImageHolder.setImageUri(imageUri);
-       }
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == OPEN_GALLERY_REQUEST && resultCode == RESULT_OK) {
+            Uri imageUri = Uri.parse(data.getDataString());
+            String str = imageUri.getPath();
+            productImageHolder.setImageUri(imageUri);
+        }
 
-       if (requestCode == TAKE_PICTURE_REQUEST && resultCode == RESULT_OK){
-           productImageHolder.setImageUri(photoURI);
-       }
+        if (requestCode == TAKE_PICTURE_REQUEST && resultCode == RESULT_OK) {
+            productImageHolder.setImageUri(photoURI);
+        }
 
     }
 

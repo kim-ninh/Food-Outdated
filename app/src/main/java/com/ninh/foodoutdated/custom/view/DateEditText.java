@@ -10,7 +10,7 @@ import com.ninh.foodoutdated.Utils;
 
 import java.util.Calendar;
 
-public class DateEditText extends android.support.v7.widget.AppCompatEditText
+public class DateEditText extends androidx.appcompat.widget.AppCompatEditText
     implements DatePickerDialog.OnDateSetListener
 {
     private DatePickerDialog datePickerDialog;
