@@ -16,7 +16,8 @@ import com.ninh.foodoutdated.Product.EXPIRY_STATE
 import com.orhanobut.logger.Logger
 import java.util.*
 
-class MyAdapter(private val mDataset: List<Product>) : RecyclerView.Adapter<MyViewHolder>() {
+class MyAdapter(private val mDataset: List<Product>) :
+    RecyclerView.Adapter<MyViewHolder>() {
     private lateinit var tracker: SelectionTracker<Long>
     fun setTracker(tracker: SelectionTracker<Long>) {
         this.tracker = tracker

@@ -20,6 +20,8 @@ constructor(
 
     private lateinit var imageView: ImageView
     private lateinit var imageViewDelete: ImageView
+    var uri: Uri? = null
+        private set
 
     init {
         initView()
@@ -48,6 +50,7 @@ constructor(
         this.visibility = View.VISIBLE
         imageView.setImageURI(uri)
         imageView.tag = uri.toString()
+        this.uri = uri
     }
 
     val imageUri: String

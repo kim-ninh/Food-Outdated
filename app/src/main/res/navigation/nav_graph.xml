@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/foodListActivity">
+    app:startDestination="@id/productsFragment">
 
-    <activity
-        android:id="@+id/foodListActivity"
-        android:name="com.ninh.foodoutdated.FoodListActivity"
-        android:label="activity_food_list"
-        tools:layout="@layout/activity_food_list" />
-    <activity
-        android:id="@+id/addProductActivity"
-        android:name="com.ninh.foodoutdated.AddProductActivity"
-        android:label="activity_add_product"
-        tools:layout="@layout/activity_add_product" />
+    <fragment
+        android:id="@+id/productsFragment"
+        android:name="com.ninh.foodoutdated.fragments.ProductsFragment"
+        android:label="fragment_products"
+        tools:layout="@layout/fragment_products" >
+        <action
+            android:id="@+id/action_productsFragment_to_addProductFragment"
+            app:destination="@id/addProductFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addProductFragment"
+        android:name="com.ninh.foodoutdated.fragments.AddProductFragment"
+        android:label="fragment_add_product"
+        tools:layout="@layout/fragment_add_product" />
 </navigation>
