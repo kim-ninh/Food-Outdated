@@ -3,7 +3,6 @@ package com.ninh.foodoutdated.custom.view
 import android.content.Context
 import android.net.Uri
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -24,12 +23,7 @@ constructor(
         private set
 
     init {
-        initView()
-    }
-
-    private fun initView() {
-        val inflater = LayoutInflater.from(context)
-        inflater.inflate(R.layout.image_holder_view, this)
+        View.inflate(context, R.layout.closeable_image_view, this)
     }
 
     override fun onFinishInflate() {

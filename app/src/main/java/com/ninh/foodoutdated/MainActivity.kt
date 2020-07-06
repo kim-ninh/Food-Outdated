@@ -24,10 +24,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             Logger.d("Navigated to $dest")
+
+            if (destination.id == R.id.productsFragment){
+                floatingActionButton.visibility = View.VISIBLE
+            }else{
+                floatingActionButton.visibility = View.GONE
+            }
         }
 
         floatingActionButton.setOnClickListener {
-            it.visibility = View.GONE
             val action = ProductsFragmentDirections
                 .actionProductsFragmentToAddProductFragment()
             navController.navigate(action)

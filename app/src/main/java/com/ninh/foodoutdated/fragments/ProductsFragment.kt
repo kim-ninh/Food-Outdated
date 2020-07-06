@@ -13,18 +13,9 @@ import com.ninh.foodoutdated.ProductAdapter
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 
-class ProductsFragment : Fragment() {
+class ProductsFragment : Fragment(R.layout.fragment_products) {
 
     private lateinit var productRecyclerView: RecyclerView
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_products, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

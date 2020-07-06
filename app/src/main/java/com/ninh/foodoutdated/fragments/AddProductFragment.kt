@@ -16,21 +16,13 @@ import com.orhanobut.logger.Logger
 import java.text.ParseException
 import java.text.SimpleDateFormat
 
-class AddProductFragment : Fragment() {
+class AddProductFragment : Fragment(R.layout.fragment_add_product) {
 
     private lateinit var productEditText: EditText
     private lateinit var expiryDateEditText: DateEditText
     private lateinit var productImageView: CloseableImageView
     private lateinit var buttonCamera: Button
     private lateinit var buttonGallery: Button
-
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_add_product, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

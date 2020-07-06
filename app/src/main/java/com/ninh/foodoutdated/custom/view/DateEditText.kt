@@ -17,31 +17,24 @@ class DateEditText
     defStyleAttr: Int = 0
 ) :
     AppCompatEditText(context, attrs, defStyleAttr), OnDateSetListener {
-    private var datePickerDialog: DatePickerDialog? = null
-    var dateFormat = Utils.DATE_PATTERN_VN
-
-    init {
-        createDatePickerDialog()
-    }
-
-    private fun createDatePickerDialog() {
-        val c = Calendar.getInstance()
-        val year = c[Calendar.YEAR]
-        val month = c[Calendar.MONTH]
-        val day = c[Calendar.DAY_OF_MONTH]
-        datePickerDialog = DatePickerDialog(
-            this.context, this, year, month, day
-        )
-    }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
         val c = Calendar.getInstance()
         c[year, month] = dayOfMonth
-        this.setText(DateFormat.format(dateFormat, c))
+        this.setText(DateFormat.format(Utils.DATE_PATTERN_VN, c))
     }
 
     override fun performClick(): Boolean {
-        datePickerDialog!!.show()
+        val c = Calendar.getInstance()
+        val year = c[Calendar.YEAR]
+        val month = c[Calendar.MONTH]
+        val day = c[Calendar.DAY_OF_MONTH]
+
+        val datePickerDialog = DatePickerDialog(
+            this.context, this, year, month, day
+        )
+
+        datePickerDialog.show()
         return super.performClick()
     }
 }
