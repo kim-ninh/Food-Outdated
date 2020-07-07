@@ -127,10 +127,10 @@ class AddProductActivity : AppCompatActivity(), View.OnClickListener {
         if (requestCode == OPEN_GALLERY_REQUEST && resultCode == Activity.RESULT_OK) {
             val imageUri = Uri.parse(data!!.dataString)
             val str = imageUri.path
-            productCloseableImage!!.setImageUri(imageUri)
+//            productCloseableImage!!.setImageUri(imageUri)
         }
         if (requestCode == TAKE_PICTURE_REQUEST && resultCode == Activity.RESULT_OK) {
-            productCloseableImage!!.setImageUri(photoURI)
+//            productCloseableImage!!.setImageUri(photoURI)
         }
     }
 
@@ -140,7 +140,8 @@ class AddProductActivity : AppCompatActivity(), View.OnClickListener {
             try {
                 val productName = txtName!!.text.toString()
                 val expiryDate = txtExpiry!!.text.toString()
-                val photoUri = productCloseableImage!!.imageUri
+//                val photoUri = productCloseableImage!!.imageUri
+                val photoUri = ""
                 val expiry = SimpleDateFormat(Utils.DATE_PATTERN_VN).parse(expiryDate)
                 product = Product(name = productName, expiry = expiry!!, thumbnail = photoUri)
             } catch (e: ParseException) {
@@ -153,7 +154,7 @@ class AddProductActivity : AppCompatActivity(), View.OnClickListener {
         var isValid = true
         val ProductName = txtName!!.text.toString()
         val expiryDate = txtExpiry!!.text.toString()
-        val photoUri = productCloseableImage!!.imageUri
+        val photoUri = ""
         txtName!!.error = null
         if (ProductName.isEmpty() && isValid) {
             Toast.makeText(this, R.string.error_message_empty_name, Toast.LENGTH_LONG).show()

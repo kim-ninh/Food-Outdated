@@ -1,12 +1,13 @@
 package com.ninh.foodoutdated.custom.view
 
 import android.content.Context
-import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import com.ninh.foodoutdated.R
+
+typealias OnCloseListener = () -> Unit
 
 class CloseableImageView
 
@@ -15,38 +16,31 @@ constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0)
-    : RelativeLayout(context, attrs, defStyleAttr), View.OnClickListener {
+    : RelativeLayout(context, attrs, defStyleAttr) {
 
-    private lateinit var imageView: ImageView
-    private lateinit var imageViewDelete: ImageView
-    var uri: Uri? = null
-        private set
+    private val imageView: ImageView
+    private val imageViewDelete: ImageView
+
+    val internalImageView: ImageView
+        get() = imageView
+
+    private var onCloseListener: OnCloseListener? = null
 
     init {
         View.inflate(context, R.layout.closeable_image_view, this)
+        imageView = rootView.findViewById(R.id.imageView)
+        imageViewDelete = rootView.findViewById(R.id.imageViewDelete)
     }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        imageView = findViewById(R.id.imageView)
-        imageView.tag = ""
-        imageViewDelete = findViewById(R.id.imageViewDelete)
-        imageViewDelete.setOnClickListener(this)
-    }
-
-    override fun onClick(v: View) {
-        if (v === imageViewDelete) {
+        imageViewDelete.setOnClickListener{
             this.visibility = View.GONE
+            onCloseListener?.invoke()
         }
     }
 
-    fun setImageUri(uri: Uri) {
-        this.visibility = View.VISIBLE
-        imageView.setImageURI(uri)
-        imageView.tag = uri.toString()
-        this.uri = uri
+    fun setOnCloseListener(onCloseListener: OnCloseListener){
+        this.onCloseListener = onCloseListener
     }
-
-    val imageUri: String
-        get() = imageView.tag.toString()
 }

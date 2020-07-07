@@ -13,6 +13,7 @@ class ProductViewModel(application: Application): AndroidViewModel(application) 
     private val repository: ProductRepo
 
     val allProducts: LiveData<List<Product>>
+    val newProductId: LiveData<Long>
 
     init {
         val executor = (application as MyApplication).workerExecutor
@@ -21,6 +22,7 @@ class ProductViewModel(application: Application): AndroidViewModel(application) 
 
         repository = ProductRepo(executor, productDao)
         allProducts = repository.allProducts
+        newProductId = repository.newProductIdObservable
     }
 
     fun insert(product: Product){

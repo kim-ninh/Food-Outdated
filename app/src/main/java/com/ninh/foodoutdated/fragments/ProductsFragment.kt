@@ -9,9 +9,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.ProductAdapter
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
+import com.orhanobut.logger.Logger
 
 class ProductsFragment : Fragment(R.layout.fragment_products) {
 
@@ -25,16 +27,30 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         productRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         productRecyclerView.adapter = productAdapter
 
-        ViewModelProvider(
+        val productViewModel = ViewModelProvider(
             requireActivity(),
             ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
         )
             .get(ProductViewModel::class.java)
-            .allProducts.observe(
+
+        productViewModel.run {
+            allProducts.observe(
                 viewLifecycleOwner
             ) { products ->
+                Logger.i("Product changed!: ${products.size}")
                 productAdapter.updateList(products)
             }
+
+            newProductId.observe(
+                viewLifecycleOwner
+            ) { newId ->
+                Snackbar.make(
+                    productRecyclerView, "Add product successful",
+                    Snackbar.LENGTH_SHORT
+                )
+                    .setAction("Action", null).show()
+            }
+        }
 
     }
 

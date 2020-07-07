@@ -13,12 +13,13 @@ import com.bumptech.glide.Glide
 import com.ninh.foodoutdated.models.Product
 
 class ProductAdapter(
-    private val products: List<Product> = ArrayList()
+    private var products: List<Product> = ArrayList()
 )
     : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
     fun updateList(products: List<Product>){
         val diffResult = DiffUtil.calculateDiff(ProductDiffCallback(this.products, products))
+        this.products = products
         diffResult.dispatchUpdatesTo(this)
     }
 
