@@ -66,7 +66,7 @@ class ProductAdapter(
             }
 
             Glide.with(productImageView)
-                .load(product.uri)
+                .load(product.file)
                 .into(productImageView)
         }
     }

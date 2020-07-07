@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.ProductAdapter
 import com.ninh.foodoutdated.R
+import com.ninh.foodoutdated.SpacingItemDecoration
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
 
@@ -22,10 +23,12 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val productAdapter = ProductAdapter()
+        val itemSpacingInPixel = resources.getDimensionPixelSize(R.dimen.item_spacing)
 
         productRecyclerView = view.findViewById(R.id.products_recycler_view)
         productRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         productRecyclerView.adapter = productAdapter
+        productRecyclerView.addItemDecoration(SpacingItemDecoration(itemSpacingInPixel))
 
         val productViewModel = ViewModelProvider(
             requireActivity(),

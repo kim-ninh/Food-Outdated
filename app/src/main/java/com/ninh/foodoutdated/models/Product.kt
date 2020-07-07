@@ -6,6 +6,7 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.ninh.foodoutdated.DateUtils
 import com.ninh.foodoutdated.ExpiryState
+import java.io.File
 import java.util.*
 
 @Entity(tableName = "products")
@@ -13,7 +14,7 @@ data class Product(
     @PrimaryKey(autoGenerate = true) var id: Long? = null,
     var name: String?,
     var expiry: Date?,
-    var uri: Uri?
+    var file: File?
 ) {
 
     @delegate:Ignore

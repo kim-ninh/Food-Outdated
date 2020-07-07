@@ -22,7 +22,10 @@ constructor(
     private val imageViewDelete: ImageView
 
     val internalImageView: ImageView
-        get() = imageView
+        get() {
+            imageViewDelete.visibility = View.VISIBLE
+            return imageView
+        }
 
     private var onCloseListener: OnCloseListener? = null
 
@@ -35,7 +38,8 @@ constructor(
     override fun onFinishInflate() {
         super.onFinishInflate()
         imageViewDelete.setOnClickListener{
-            this.visibility = View.GONE
+            imageView.setImageDrawable(null)
+            imageViewDelete.visibility = View.INVISIBLE
             onCloseListener?.invoke()
         }
     }

@@ -1,7 +1,9 @@
 package com.ninh.foodoutdated.fragments
 
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -16,6 +18,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.ninh.foodoutdated.MyApplication
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.Utils
 import com.ninh.foodoutdated.custom.view.CloseableImageView
@@ -23,11 +26,11 @@ import com.ninh.foodoutdated.custom.view.DateEditText
 import com.ninh.foodoutdated.models.Product
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
-import java.io.File
-import java.io.IOException
+import java.io.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ExecutorService
 
 class AddProductFragment : Fragment(R.layout.fragment_add_product) {
 
@@ -40,6 +43,9 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
     private lateinit var productViewModel: ProductViewModel
 
     private var photoUri: Uri? = null
+    private var photoFile: File? = null
+
+    private lateinit var executorService: ExecutorService
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -50,8 +56,8 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
         productImageView = view.findViewById(R.id.product_image_view)
         buttonCamera = view.findViewById(R.id.button_camera)
         buttonGallery = view.findViewById(R.id.button_gallery)
-        buttonGallery.setOnClickListener(this::selectImage)
-        buttonCamera.setOnClickListener(this::dispatchTakePictureIntent)
+        buttonGallery.setOnClickListener(this::handleRequestImage)
+        buttonCamera.setOnClickListener(this::handleRequestImage)
 
         productViewModel = ViewModelProvider(
             requireActivity(),
@@ -60,8 +66,11 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             .get(ProductViewModel::class.java)
 
         productImageView.setOnCloseListener {
-            photoUri = null
+            photoFile?.delete()
+            photoFile = null
         }
+
+        executorService = (requireActivity().application as MyApplication).workerExecutor
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -69,18 +78,49 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
 
         if (requestCode == REQUEST_IMAGE_GET && resultCode == Activity.RESULT_OK) {
             val imageUri: Uri = data!!.data!!
-            photoUri = imageUri
+            val photoFile = createImageFile()
+            this.photoFile = photoFile
 
-            Glide.with(this)
-                .load(photoUri)
-                .into(productImageView.internalImageView)
+            decodeBitmapAndSave(imageUri, photoFile){
+                Glide.with(this)
+                    .load(photoFile)
+                    .centerCrop()
+                    .into(productImageView.internalImageView)
+            }
         }
 
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-            // photoUri already used when open Camera Activity
-            Glide.with(this)
-                .load(photoUri)
-                .into(productImageView.internalImageView)
+            val fullSizePhotoFile: File? = this.photoFile
+            val resizedPhotoFile = createImageFile()
+
+            val photoUri = this.photoUri!!
+            decodeBitmapAndSave(photoUri, resizedPhotoFile){
+                Glide.with(this)
+                    .load(resizedPhotoFile)
+                    .centerCrop()
+                    .into(productImageView.internalImageView)
+
+                fullSizePhotoFile?.delete()
+                this.photoFile = resizedPhotoFile
+            }
+        }
+    }
+
+    private fun decodeBitmapAndSave(uri: Uri, file: File, uiCallback: () -> Unit) {
+        executorService.submit {
+            val futureTarget = Glide.with(this)
+                .asBitmap()
+                .load(uri)
+                .centerInside()
+                .submit(1080, 1080)
+            val bitmap: Bitmap = futureTarget.get()
+
+            FileOutputStream(file).use {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, it)
+            }
+
+            Glide.with(this).clear(futureTarget)
+            requireActivity().runOnUiThread(uiCallback)
         }
     }
 
@@ -113,26 +153,33 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             try {
                 val productName = productEditText.text.toString()
                 val expiryDateStr = expiryDateEditText.text.toString()
-                val photoUri = this.photoUri
                 val expiryDate = SimpleDateFormat(Utils.DATE_PATTERN_VN).parse(expiryDateStr)
-                product = Product(name = productName, expiry = expiryDate, uri = photoUri)
+                product = Product(name = productName, expiry = expiryDate, file = photoFile)
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
             return product
         }
 
-    @Throws(IOException::class)
     private fun createImageFile(): File {
-        // Create an image file name
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        val imageFileName = "JPEG_" + timeStamp + "_"
         val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(
-            imageFileName,  /* prefix */
-            ".jpg",  /* suffix */
-            storageDir /* directory */
-        )
+        val productDir = File(storageDir, "products")
+        if (!productDir.exists()) {
+            productDir.mkdirs()
+        }
+
+        return File(productDir, "JPEG_$timeStamp.jpg")
+    }
+
+    private fun handleRequestImage(view: View){
+        photoFile?.delete()
+        photoFile = null
+
+        when(view){
+            buttonGallery -> selectImage(view)
+            buttonCamera -> dispatchTakePictureIntent(view)
+        }
     }
 
     private fun dispatchTakePictureIntent(view: View) {
@@ -141,21 +188,14 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             return
         }
 
-        val photoFile: File? = try {
-            createImageFile()
-        } catch (ex: IOException) {
-            Logger.e(ex, "CreateImageFile failed!")
-            null
-        }
-
-        photoFile?.also {
+        intent.also {
+            val photoFile = createImageFile()
             photoUri = FileProvider.getUriForFile(
-                requireContext(),
-                "com.ninh.foodoutdated",
-                it
+                requireContext(), "com.ninh.foodoutdated", photoFile
             )
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-            startActivityForResult(intent, REQUEST_TAKE_PHOTO)
+            it.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            startActivityForResult(it, REQUEST_TAKE_PHOTO)
+            this.photoFile = photoFile
         }
     }
 
@@ -173,7 +213,6 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
         var isValid = true
         val productName = productEditText.text.toString()
         val expiryDate = expiryDateEditText.text.toString()
-        val photoUri = this.photoUri
 
         productEditText.error = null
         if (productName.isEmpty() && isValid) {
@@ -188,7 +227,7 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             isValid = false
         }
 
-        if (photoUri == null && isValid) {
+        if (photoFile == null && isValid) {
             Toast.makeText(requireContext(), R.string.error_message_empty_photo, Toast.LENGTH_LONG)
                 .show()
             isValid = false
