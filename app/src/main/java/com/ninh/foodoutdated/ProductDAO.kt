@@ -1,8 +1,6 @@
 package com.ninh.foodoutdated
 
 import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.orhanobut.logger.Logger
 import java.io.*
 import java.util.*
@@ -11,7 +9,6 @@ import kotlin.collections.ArrayList
 class ProductDAO internal constructor(private val context: Context) {
     private var products: MutableList<Product> = ArrayList()
     private val FILE_NAME = "data.json"
-    private val gson: Gson
     private val isFileExists: Boolean
         private get() {
             val dataFile = File(context.filesDir, FILE_NAME)
@@ -27,8 +24,8 @@ class ProductDAO internal constructor(private val context: Context) {
             inputStream = context.openFileInput(FILE_NAME)
             reader = BufferedReader(FileReader(inputStream.fd))
             data = reader.readLine()
-            val productType = object : TypeToken<List<Product?>?>() {}.type
-            productList = gson.fromJson<MutableList<Product>>(data, productType)
+//            val productType = object : TypeToken<List<Product?>?>() {}.type
+//            productList = gson.fromJson<MutableList<Product>>(data, productType)
             inputStream.close()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -37,17 +34,7 @@ class ProductDAO internal constructor(private val context: Context) {
     }
 
     private fun saveToFile() {
-        val data = gson.toJson(products)
-        val file = File(context.filesDir, FILE_NAME)
-        Logger.i(file.absolutePath)
-        val outputStream: FileOutputStream
-        try {
-            outputStream = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE)
-            outputStream.write(data.toByteArray())
-            outputStream.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+
     }
 
     fun loadAll(): List<Product> {
@@ -92,7 +79,6 @@ class ProductDAO internal constructor(private val context: Context) {
     }
 
     init {
-        gson = Gson()
         if (isFileExists) {
             products = loadFromFile()
         }

@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.selection.ItemDetailsLookup
+import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -14,10 +16,11 @@ import com.ninh.foodoutdated.models.Product
 
 class ProductAdapter(
     private var products: List<Product> = ArrayList()
-)
-    : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
-    fun updateList(products: List<Product>){
+    lateinit var tracker: SelectionTracker<Long>
+
+    fun updateList(products: List<Product>) {
         val diffResult = DiffUtil.calculateDiff(ProductDiffCallback(this.products, products))
         this.products = products
         diffResult.dispatchUpdatesTo(this)
@@ -32,7 +35,20 @@ class ProductAdapter(
     override fun getItemCount(): Int = products.size
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        holder.bind(products[position], false)
+        val product = products[position]
+        holder.bind(product, tracker.isSelected(product.id))
+    }
+
+    fun getItemKey(position: Int): Long {
+        return products[position].id!!
+    }
+
+    fun getPosition(key: Long): Int {
+        var position = products.indexOfFirst { it.id == key }
+        if (position == -1) {
+            position = RecyclerView.NO_POSITION
+        }
+        return position
     }
 
     class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -56,10 +72,11 @@ class ProductAdapter(
             color
         }
 
-        fun bind(product: Product, isActive: Boolean){
+        fun bind(product: Product, isActive: Boolean) {
+            itemView.isActivated = isActive
             productTextView.text = product.name
             productExpiryTextView.text = DateFormat.format(Utils.DATE_PATTERN_VN, product.expiry)
-            when(product.state){
+            when (product.state) {
                 ExpiryState.NEW -> productExpiryTextView.setTextColor(GREEN_COLOR)
                 ExpiryState.EXPIRED -> productExpiryTextView.setTextColor(RED_COLOR)
                 ExpiryState.NEARLY_EXPIRY -> productExpiryTextView.setTextColor(YELLOW_COLOR)
@@ -68,6 +85,19 @@ class ProductAdapter(
             Glide.with(productImageView)
                 .load(product.file)
                 .into(productImageView)
+        }
+
+        fun getItemsDetails(key: Long): ItemDetailsLookup.ItemDetails<Long>{
+            return object : ItemDetailsLookup.ItemDetails<Long>() {
+                override fun getSelectionKey(): Long? {
+                    return key
+                }
+
+                override fun getPosition(): Int {
+                    return adapterPosition
+                }
+
+            }
         }
     }
 }
