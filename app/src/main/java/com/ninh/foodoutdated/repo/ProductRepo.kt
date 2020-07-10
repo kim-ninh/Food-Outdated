@@ -1,6 +1,5 @@
 package com.ninh.foodoutdated.repo
 
-import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ninh.foodoutdated.dao.ProductDao
@@ -13,7 +12,10 @@ class ProductRepo(
 ) {
 
     private val _newProductIdObservable = MutableLiveData<Long>()
+    private val _totalRowDeletedObserver = MutableLiveData<Int>()
 
+    val totalRowDeletedObserver: LiveData<Int>
+        get() = _totalRowDeletedObserver
     val newProductIdObservable: LiveData<Long>
         get() = _newProductIdObservable
     val allProducts: LiveData<List<Product>> = productDao.loadAllProducts()
@@ -28,6 +30,13 @@ class ProductRepo(
     fun deleteProducts(products: List<Product>){
         executor.submit{
             productDao.deleteProducts(products)
+        }
+    }
+
+    fun deleteProductsByIds(productIds: LongArray){
+        executor.submit {
+            val numOfRowAffected = productDao.deleteProductsById(productIds)
+            _totalRowDeletedObserver.postValue(numOfRowAffected)
         }
     }
 }

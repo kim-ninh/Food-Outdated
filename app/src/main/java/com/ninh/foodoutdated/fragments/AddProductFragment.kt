@@ -50,6 +50,10 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        savedInstanceState?.let {
+            photoUri = it.getParcelable(KEY_PHOTO_URI)
+        }
+
         setHasOptionsMenu(true)
         productEditText = view.findViewById(R.id.product_edit_text)
         expiryDateEditText = view.findViewById(R.id.expiry_date_edit_text)
@@ -104,6 +108,11 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
                 this.photoFile = resizedPhotoFile
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable(KEY_PHOTO_URI, photoUri)
     }
 
     private fun decodeBitmapAndSave(uri: Uri, file: File, uiCallback: () -> Unit) {
@@ -238,6 +247,7 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
     companion object {
         private const val REQUEST_TAKE_PHOTO = 0
         private const val REQUEST_IMAGE_GET = 1
+        private const val KEY_PHOTO_URI = "KEY_PHOTO_URI"
 
         @JvmStatic
         fun newInstance() = AddProductFragment()

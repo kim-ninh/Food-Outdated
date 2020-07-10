@@ -56,6 +56,7 @@
 
             <com.ninh.foodoutdated.custom.view.DateEditText
                 android:id="@+id/expiry_date_edit_text"
+                style="@style/Widget.AppCompat.EditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/spacing_normal"
@@ -65,7 +66,7 @@
             <com.ninh.foodoutdated.custom.view.CloseableImageView
                 android:id="@+id/product_image_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="350dp"/>
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

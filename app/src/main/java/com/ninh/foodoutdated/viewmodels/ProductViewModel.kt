@@ -14,6 +14,7 @@ class ProductViewModel(application: Application): AndroidViewModel(application) 
 
     val allProducts: LiveData<List<Product>>
     val newProductId: LiveData<Long>
+    val totalRowDeleted: LiveData<Int>
 
     init {
         val executor = (application as MyApplication).workerExecutor
@@ -23,6 +24,7 @@ class ProductViewModel(application: Application): AndroidViewModel(application) 
         repository = ProductRepo(executor, productDao)
         allProducts = repository.allProducts
         newProductId = repository.newProductIdObservable
+        totalRowDeleted = repository.totalRowDeletedObserver
     }
 
     fun insert(product: Product){
@@ -31,5 +33,9 @@ class ProductViewModel(application: Application): AndroidViewModel(application) 
 
     fun delete(products: List<Product>){
         repository.deleteProducts(products)
+    }
+
+    fun deleteByIds(productIds: LongArray){
+        repository.deleteProductsByIds(productIds)
     }
 }

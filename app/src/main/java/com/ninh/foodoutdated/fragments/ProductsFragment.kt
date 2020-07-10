@@ -21,6 +21,7 @@ import com.orhanobut.logger.Logger
 
 class ProductsFragment : Fragment(R.layout.fragment_products) {
 
+    private lateinit var productViewModel: ProductViewModel
     private lateinit var productRecyclerView: RecyclerView
     private lateinit var selectionTracker: SelectionTracker<Long>
 
@@ -28,7 +29,20 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
     private var actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            return false
+            return when (item.itemId) {
+                R.id.item_delete -> {
+                    val selection = selectionTracker.selection
+                    val selectedIds = LongArray(selection.size())
+                    val it: Iterator<Long> = selection.iterator()
+                    var i = 0
+                    while (it.hasNext()) {
+                        selectedIds[i++] = it.next()
+                    }
+                    productViewModel.deleteByIds(selectedIds)
+                    true
+                }
+                else -> false
+            }
         }
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
@@ -45,7 +59,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
-            if (selectionTracker.selection.size() != 0){
+            if (selectionTracker.selection.size() != 0) {
                 selectionTracker.clearSelection()
             }
         }
@@ -75,11 +89,13 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
                 super.onSelectionChanged()
 
                 val totalSelection = selectionTracker.selection.size()
-                if (actionMode == null && totalSelection == 1){
-                    actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(actionModeCallback)
+                if (actionMode == null && totalSelection == 1) {
+                    actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(
+                        actionModeCallback
+                    )
                 }
                 actionMode?.invalidate()
-                if (totalSelection == 0){
+                if (totalSelection == 0) {
                     actionMode?.finish()
                 }
             }
@@ -87,7 +103,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
         productAdapter.tracker = selectionTracker
 
-        val productViewModel = ViewModelProvider(
+        productViewModel = ViewModelProvider(
             requireActivity(),
             ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
         )
@@ -105,10 +121,21 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
                 viewLifecycleOwner
             ) { newId ->
                 Snackbar.make(
-                    productRecyclerView, "Add product successful",
-                    Snackbar.LENGTH_SHORT
+                    requireActivity().findViewById(R.id.coordinatorLayout), "Add product successful",
+                    Snackbar.LENGTH_LONG
                 )
-                    .setAction("Action", null).show()
+                    .show()
+            }
+
+            totalRowDeleted.observe(
+                viewLifecycleOwner
+            ) { totalRow ->
+                actionMode?.finish()
+                Snackbar.make(
+                    requireActivity().findViewById(R.id.coordinatorLayout), "Deleted $totalRow item",
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction("Undo"){}.show()
             }
         }
 

@@ -15,4 +15,7 @@ interface ProductDao {
 
     @Delete
     fun deleteProducts(products: List<Product>)
+
+    @Query("DELETE FROM products WHERE id IN (:productIds)")
+    fun deleteProductsById(productIds: LongArray): Int
 }
