@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.AddProductFragment">
+    tools:context=".newproduct.AddProductFragment">
 
     <LinearLayout
         android:id="@+id/sticky_bottom"
@@ -54,7 +54,7 @@
                 android:hint="Product name"
                 android:inputType="textPersonName" />
 
-            <com.ninh.foodoutdated.custom.view.DateEditText
+            <com.ninh.foodoutdated.customview.DateEditText
                 android:id="@+id/expiry_date_edit_text"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="match_parent"
@@ -63,7 +63,7 @@
                 android:focusableInTouchMode="false"
                 android:hint="Expiry date"/>
 
-            <com.ninh.foodoutdated.custom.view.CloseableImageView
+            <com.ninh.foodoutdated.customview.CloseableImageView
                 android:id="@+id/product_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="350dp"/>

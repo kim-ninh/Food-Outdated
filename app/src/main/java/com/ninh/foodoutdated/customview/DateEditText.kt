@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated.custom.view
+package com.ninh.foodoutdated.customview
 
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
@@ -7,7 +7,7 @@ import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.widget.DatePicker
 import androidx.appcompat.widget.AppCompatEditText
-import com.ninh.foodoutdated.Utils
+import com.ninh.foodoutdated.R
 import java.util.*
 
 class DateEditText
@@ -21,7 +21,7 @@ class DateEditText
     override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
         val c = Calendar.getInstance()
         c[year, month] = dayOfMonth
-        this.setText(DateFormat.format(Utils.DATE_PATTERN_VN, c))
+        this.setText(DateFormat.format(resources.getString(R.string.date_pattern_vn), c))
     }
 
     override fun performClick(): Boolean {

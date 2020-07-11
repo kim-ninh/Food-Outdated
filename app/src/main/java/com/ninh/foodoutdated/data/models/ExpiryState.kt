@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated
+package com.ninh.foodoutdated.data.models
 
 enum class ExpiryState {
     EXPIRED,

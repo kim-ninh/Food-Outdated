@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated
+package com.ninh.foodoutdated.data
 
 import android.net.Uri
 import androidx.room.TypeConverter

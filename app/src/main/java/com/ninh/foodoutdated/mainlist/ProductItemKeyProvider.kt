@@ -1,6 +1,7 @@
-package com.ninh.foodoutdated
+package com.ninh.foodoutdated.mainlist
 
 import androidx.recyclerview.selection.ItemKeyProvider
+import com.ninh.foodoutdated.mainlist.ProductAdapter
 
 class ProductItemKeyProvider(private val adapter: ProductAdapter)
     : ItemKeyProvider<Long>(SCOPE_MAPPED) {

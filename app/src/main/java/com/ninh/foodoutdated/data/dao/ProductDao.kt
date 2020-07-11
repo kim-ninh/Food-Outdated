@@ -1,8 +1,8 @@
-package com.ninh.foodoutdated.dao
+package com.ninh.foodoutdated.data.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.ninh.foodoutdated.models.Product
+import com.ninh.foodoutdated.data.models.Product
 
 @Dao
 interface ProductDao {

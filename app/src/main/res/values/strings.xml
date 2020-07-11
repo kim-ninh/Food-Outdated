@@ -10,4 +10,8 @@
     <string name="error_message_empty_photo">Please take a photo or pick in gallery</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--    Date format for text view -->
+    <string name="date_pattern_vn">dd/MM/yyyy</string>
+    <string name="sql_date_pattern">yyyy-mm-dd</string>
 </resources>

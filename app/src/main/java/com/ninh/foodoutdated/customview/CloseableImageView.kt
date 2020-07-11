@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated.custom.view
+package com.ninh.foodoutdated.customview
 
 import android.content.Context
 import android.util.AttributeSet

@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated.fragments
+package com.ninh.foodoutdated.mainlist
 
 import android.os.Bundle
 import android.view.Menu
@@ -73,12 +73,18 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         productRecyclerView = view.findViewById(R.id.products_recycler_view)
         productRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         productRecyclerView.adapter = productAdapter
-        productRecyclerView.addItemDecoration(SpacingItemDecoration(itemSpacingInPixel))
+        productRecyclerView.addItemDecoration(
+            SpacingItemDecoration(
+                itemSpacingInPixel
+            )
+        )
         selectionTracker = SelectionTracker.Builder(
             "product-selection-id",
             productRecyclerView,
             ProductItemKeyProvider(productAdapter),
-            ProductItemDetailsLookup(productRecyclerView),
+            ProductItemDetailsLookup(
+                productRecyclerView
+            ),
             StorageStrategy.createLongStorage()
         )
             .withSelectionPredicate(SelectionPredicates.createSelectAnything())
@@ -114,7 +120,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
                 viewLifecycleOwner
             ) { products ->
                 Logger.i("Product changed!: ${products.size}")
-                productAdapter.updateList(products)
+                productAdapter.submitList(products)
             }
 
             newProductId.observe(

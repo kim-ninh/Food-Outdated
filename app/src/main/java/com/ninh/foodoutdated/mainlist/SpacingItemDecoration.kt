@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated
+package com.ninh.foodoutdated.mainlist
 
 import android.graphics.Rect
 import android.view.View

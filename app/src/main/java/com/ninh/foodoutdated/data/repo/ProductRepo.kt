@@ -1,9 +1,9 @@
-package com.ninh.foodoutdated.repo
+package com.ninh.foodoutdated.data.repo
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ninh.foodoutdated.dao.ProductDao
-import com.ninh.foodoutdated.models.Product
+import com.ninh.foodoutdated.data.dao.ProductDao
+import com.ninh.foodoutdated.data.models.Product
 import java.util.concurrent.ExecutorService
 
 class ProductRepo(

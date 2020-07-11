@@ -1,7 +1,6 @@
-package com.ninh.foodoutdated.fragments
+package com.ninh.foodoutdated.newproduct
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -12,7 +11,6 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
@@ -20,12 +18,10 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.ninh.foodoutdated.MyApplication
 import com.ninh.foodoutdated.R
-import com.ninh.foodoutdated.Utils
-import com.ninh.foodoutdated.custom.view.CloseableImageView
-import com.ninh.foodoutdated.custom.view.DateEditText
-import com.ninh.foodoutdated.models.Product
+import com.ninh.foodoutdated.customview.CloseableImageView
+import com.ninh.foodoutdated.customview.DateEditText
+import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
-import com.orhanobut.logger.Logger
 import java.io.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -146,8 +142,8 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
                         productViewModel.insert(it)
                     }
 
-                    val action = AddProductFragmentDirections
-                        .actionAddProductFragmentToProductsFragment()
+                    val action =
+                        AddProductFragmentDirections.actionAddProductFragmentToProductsFragment()
                     findNavController().navigate(action)
                 }
                 true
@@ -162,7 +158,7 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             try {
                 val productName = productEditText.text.toString()
                 val expiryDateStr = expiryDateEditText.text.toString()
-                val expiryDate = SimpleDateFormat(Utils.DATE_PATTERN_VN).parse(expiryDateStr)
+                val expiryDate = SimpleDateFormat(getString(R.string.date_pattern_vn)).parse(expiryDateStr)
                 product = Product(name = productName, expiry = expiryDate, file = photoFile)
             } catch (e: ParseException) {
                 e.printStackTrace()
@@ -203,7 +199,9 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
                 requireContext(), "com.ninh.foodoutdated", photoFile
             )
             it.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-            startActivityForResult(it, REQUEST_TAKE_PHOTO)
+            startActivityForResult(it,
+                REQUEST_TAKE_PHOTO
+            )
             this.photoFile = photoFile
         }
     }
@@ -214,7 +212,9 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
         }
 
         if (intent.resolveActivity(requireActivity().packageManager) != null) {
-            startActivityForResult(intent, REQUEST_IMAGE_GET)
+            startActivityForResult(intent,
+                REQUEST_IMAGE_GET
+            )
         }
     }
 

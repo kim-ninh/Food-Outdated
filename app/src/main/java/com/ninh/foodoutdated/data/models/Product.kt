@@ -1,11 +1,9 @@
-package com.ninh.foodoutdated.models
+package com.ninh.foodoutdated.data.models
 
-import android.net.Uri
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.ninh.foodoutdated.DateUtils
-import com.ninh.foodoutdated.ExpiryState
 import java.io.File
 import java.util.*
 
@@ -21,8 +19,8 @@ data class Product(
     val state by lazy {
         var newState = ExpiryState.NEW
         val now = Calendar.getInstance()
-        val elapsedDate = DateUtils.substract(expiry, now.time)
-        if (0 < elapsedDate && elapsedDate <= remainDayUtilWarn) {
+        val elapsedDate = DateUtils.subtract(expiry, now.time)
+        if (elapsedDate in 1..remainDayUtilWarn) {
             newState = ExpiryState.NEARLY_EXPIRY
         } else if (elapsedDate <= 0) {
             newState = ExpiryState.EXPIRED

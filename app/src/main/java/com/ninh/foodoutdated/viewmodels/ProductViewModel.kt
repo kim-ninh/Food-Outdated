@@ -4,9 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import com.ninh.foodoutdated.MyApplication
-import com.ninh.foodoutdated.ProductDatabase
-import com.ninh.foodoutdated.models.Product
-import com.ninh.foodoutdated.repo.ProductRepo
+import com.ninh.foodoutdated.data.ProductDatabase
+import com.ninh.foodoutdated.data.models.Product
+import com.ninh.foodoutdated.data.repo.ProductRepo
 
 class ProductViewModel(application: Application): AndroidViewModel(application) {
 

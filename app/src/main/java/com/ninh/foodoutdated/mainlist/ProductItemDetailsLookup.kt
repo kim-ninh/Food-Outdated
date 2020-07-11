@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated
+package com.ninh.foodoutdated.mainlist
 
 import android.view.MotionEvent
 import android.view.View

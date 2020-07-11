@@ -6,7 +6,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.ninh.foodoutdated.fragments.ProductsFragmentDirections
+import com.ninh.foodoutdated.mainlist.ProductsFragmentDirections
+
 import com.orhanobut.logger.Logger
 
 class MainActivity : AppCompatActivity() {

@@ -1,6 +1,5 @@
-package com.ninh.foodoutdated
+package com.ninh.foodoutdated.mainlist
 
-import android.graphics.Color
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
@@ -10,41 +9,37 @@ import android.widget.TextView
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.ninh.foodoutdated.models.Product
+import com.ninh.foodoutdated.data.models.ExpiryState
+import com.ninh.foodoutdated.R
+import com.ninh.foodoutdated.data.models.Product
 
 class ProductAdapter(
-    private var products: List<Product> = ArrayList()
-) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+) : ListAdapter<Product, ProductAdapter.ProductViewHolder>(
+    PRODUCT_DIFF_CALLBACK
+) {
 
     lateinit var tracker: SelectionTracker<Long>
-
-    fun updateList(products: List<Product>) {
-        val diffResult = DiffUtil.calculateDiff(ProductDiffCallback(this.products, products))
-        this.products = products
-        diffResult.dispatchUpdatesTo(this)
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.product_item, parent, false)
-        return ProductViewHolder(view)
+        return ProductViewHolder(
+            view
+        )
     }
 
-    override fun getItemCount(): Int = products.size
-
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
-        val product = products[position]
+        val product = getItem(position)
         holder.bind(product, tracker.isSelected(product.id))
     }
 
-    fun getItemKey(position: Int): Long {
-        return products[position].id!!
-    }
+    fun getItemKey(position: Int): Long = getItem(position).id!!
 
     fun getPosition(key: Long): Int {
-        var position = products.indexOfFirst { it.id == key }
+        var position = currentList.indexOfFirst { it.id == key }
         if (position == -1) {
             position = RecyclerView.NO_POSITION
         }
@@ -75,7 +70,7 @@ class ProductAdapter(
         fun bind(product: Product, isActive: Boolean) {
             itemView.isActivated = isActive
             productTextView.text = product.name
-            productExpiryTextView.text = DateFormat.format(Utils.DATE_PATTERN_VN, product.expiry)
+            productExpiryTextView.text = DateFormat.format(itemView.resources.getString(R.string.date_pattern_vn), product.expiry)
             when (product.state) {
                 ExpiryState.NEW -> productExpiryTextView.setTextColor(GREEN_COLOR)
                 ExpiryState.EXPIRED -> productExpiryTextView.setTextColor(RED_COLOR)
@@ -100,4 +95,12 @@ class ProductAdapter(
             }
         }
     }
+}
+
+object PRODUCT_DIFF_CALLBACK : DiffUtil.ItemCallback<Product>(){
+    override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean
+            = oldItem.id == newItem.id
+
+    override fun areContentsTheSame(oldItem: Product, newItem: Product): Boolean
+            = oldItem == newItem
 }

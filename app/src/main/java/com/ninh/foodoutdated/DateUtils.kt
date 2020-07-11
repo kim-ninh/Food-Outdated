@@ -3,11 +3,9 @@ package com.ninh.foodoutdated
 import java.util.*
 
 object DateUtils {
-    fun substract(d2: Date?, d1: Date?): Int {
-        val c1: Calendar
-        val c2: Calendar
-        c1 = Calendar.getInstance()
-        c2 = Calendar.getInstance()
+    fun subtract(d2: Date?, d1: Date?): Int {
+        val c1: Calendar = Calendar.getInstance()
+        val c2: Calendar = Calendar.getInstance()
         c1.time = d1
         c2.time = d2
         return subtract(c2, c1)
