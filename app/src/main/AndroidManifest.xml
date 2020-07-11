@@ -29,8 +29,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
-        <activity android:name="com.ninh.foodoutdated.AddProductActivity" />
         <activity android:name="com.ninh.foodoutdated.MainActivity"
             android:theme="@style/ActionModeTheme">
             <intent-filter>
@@ -38,15 +36,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="com.ninh.foodoutdated.FoodListActivity"
-            android:theme="@style/ActionModeTheme">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
         </activity>
     </application>
 
