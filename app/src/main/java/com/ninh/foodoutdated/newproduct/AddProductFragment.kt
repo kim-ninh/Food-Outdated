@@ -1,6 +1,7 @@
 package com.ninh.foodoutdated.newproduct
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -8,17 +9,25 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.view.*
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
-import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
+import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ninh.foodoutdated.MyApplication
 import com.ninh.foodoutdated.R
-import com.ninh.foodoutdated.customview.CloseableImageView
 import com.ninh.foodoutdated.customview.DateEditText
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
@@ -31,10 +40,8 @@ import java.util.concurrent.ExecutorService
 class AddProductFragment : Fragment(R.layout.fragment_add_product) {
 
     private lateinit var productEditText: EditText
-    private lateinit var expiryDateEditText: DateEditText
-    private lateinit var productImageView: CloseableImageView
-    private lateinit var buttonCamera: Button
-    private lateinit var buttonGallery: Button
+    private lateinit var expiryDateEditText: TextView
+    private lateinit var productImageView: ImageView
 
     private lateinit var productViewModel: ProductViewModel
 
@@ -46,6 +53,11 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val toolBar: Toolbar = view.findViewById(R.id.toolBar)
+        val navController = findNavController()
+        val appBarConfiguration = AppBarConfiguration(navController.graph)
+        toolBar.setupWithNavController(navController, appBarConfiguration)
+
         savedInstanceState?.let {
             photoUri = it.getParcelable(KEY_PHOTO_URI)
         }
@@ -54,10 +66,8 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
         productEditText = view.findViewById(R.id.product_edit_text)
         expiryDateEditText = view.findViewById(R.id.expiry_date_edit_text)
         productImageView = view.findViewById(R.id.product_image_view)
-        buttonCamera = view.findViewById(R.id.button_camera)
-        buttonGallery = view.findViewById(R.id.button_gallery)
-        buttonGallery.setOnClickListener(this::handleRequestImage)
-        buttonCamera.setOnClickListener(this::handleRequestImage)
+
+        val collapsingToolbarLayout: CollapsingToolbarLayout = view.findViewById(R.id.collapsingToolbarLayout)
 
         productViewModel = ViewModelProvider(
             requireActivity(),
@@ -65,12 +75,71 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
         )
             .get(ProductViewModel::class.java)
 
-        productImageView.setOnCloseListener {
-            photoFile?.delete()
-            photoFile = null
+        val productImageActions = arrayOf(
+            ProductImageAction("Remove photo", R.drawable.ic_clear_black_24dp, this::removePhotoFile),
+            ProductImageAction("Take photo", R.drawable.ic_camera_alt_black_24dp, this::dispatchTakePictureIntent),
+            ProductImageAction("Pick from gallery", R.drawable.ic_photo_black_24dp, this::selectImage)
+        )
+
+        val simpleDialog = MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Title")
+            .setAdapter(ProductImageActionAdapter(productImageActions)){_, which ->
+                productImageActions[which].action.invoke()
+            }
+
+        productImageView.setOnClickListener{
+            simpleDialog.show()
         }
 
         executorService = (requireActivity().application as MyApplication).workerExecutor
+
+        productEditText.setOnClickListener{
+            collapsingToolbarLayout.title = ""
+            it.alpha = 1f
+        }
+
+        productEditText.setOnEditorActionListener { v, actionId, event ->
+            return@setOnEditorActionListener when(actionId){
+                EditorInfo.IME_ACTION_DONE -> {
+                    collapsingToolbarLayout.title = productEditText.text
+                    productEditText.alpha = 0f
+                    false
+                }
+                else -> false
+            }
+        }
+
+        productEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus){
+                collapsingToolbarLayout.title = productEditText.text
+                productEditText.alpha = 0f
+            }
+        }
+
+        toolBar.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.item_add ->{
+                    Toast.makeText(requireContext(),"Item add touched!", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        val builder = MaterialDatePicker.Builder.datePicker().apply {
+
+        }
+
+        val picker = builder.build().apply {
+            addOnPositiveButtonClickListener {
+                expiryDateEditText.text = this.headerText
+            }
+        }
+
+        expiryDateEditText.setOnClickListener {
+            picker.show(childFragmentManager, picker.toString())
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -81,11 +150,8 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             val photoFile = createImageFile()
             this.photoFile = photoFile
 
-            decodeBitmapAndSave(imageUri, photoFile){
-                Glide.with(this)
-                    .load(photoFile)
-                    .centerCrop()
-                    .into(productImageView.internalImageView)
+            decodeBitmapAndSave(imageUri, photoFile) {
+                updateProductImageView(photoFile)
             }
         }
 
@@ -94,16 +160,22 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             val resizedPhotoFile = createImageFile()
 
             val photoUri = this.photoUri!!
-            decodeBitmapAndSave(photoUri, resizedPhotoFile){
-                Glide.with(this)
-                    .load(resizedPhotoFile)
-                    .centerCrop()
-                    .into(productImageView.internalImageView)
+            decodeBitmapAndSave(photoUri, resizedPhotoFile) {
+                updateProductImageView(resizedPhotoFile)
 
                 fullSizePhotoFile?.delete()
                 this.photoFile = resizedPhotoFile
             }
         }
+    }
+
+    private fun updateProductImageView(file: File){
+        productImageView.alpha = 1f
+
+        Glide.with(this)
+            .load(file)
+            .centerCrop()
+            .into(productImageView)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -158,7 +230,8 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
             try {
                 val productName = productEditText.text.toString()
                 val expiryDateStr = expiryDateEditText.text.toString()
-                val expiryDate = SimpleDateFormat(getString(R.string.date_pattern_vn)).parse(expiryDateStr)
+                val expiryDate =
+                    SimpleDateFormat(getString(R.string.date_pattern_vn)).parse(expiryDateStr)
                 product = Product(name = productName, expiry = expiryDate, file = photoFile)
             } catch (e: ParseException) {
                 e.printStackTrace()
@@ -177,17 +250,19 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
         return File(productDir, "JPEG_$timeStamp.jpg")
     }
 
-    private fun handleRequestImage(view: View){
+    private fun removePhotoFile(){
         photoFile?.delete()
         photoFile = null
 
-        when(view){
-            buttonGallery -> selectImage(view)
-            buttonCamera -> dispatchTakePictureIntent(view)
-        }
+        productImageView.alpha = 0.1f
+        Glide.with(requireContext())
+            .load(R.drawable.ic_waste)
+            .fitCenter()
+            .into(productImageView)
     }
 
-    private fun dispatchTakePictureIntent(view: View) {
+    private fun dispatchTakePictureIntent() {
+        removePhotoFile()
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         if (intent.resolveActivity(requireContext().packageManager) == null) {
             return
@@ -199,22 +274,19 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product) {
                 requireContext(), "com.ninh.foodoutdated", photoFile
             )
             it.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-            startActivityForResult(it,
-                REQUEST_TAKE_PHOTO
-            )
+            startActivityForResult(it, REQUEST_TAKE_PHOTO)
             this.photoFile = photoFile
         }
     }
 
-    private fun selectImage(view: View) {
+    private fun selectImage() {
+        removePhotoFile()
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             type = "image/*"
         }
 
         if (intent.resolveActivity(requireActivity().packageManager) != null) {
-            startActivityForResult(intent,
-                REQUEST_IMAGE_GET
-            )
+            startActivityForResult(intent, REQUEST_IMAGE_GET)
         }
     }
 

@@ -1,21 +1,40 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Apply for all button style -->
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+
+        <!--  Action mode style       -->
+        <item name="windowActionModeOverlay">true</item>
+        <item name="actionModeStyle">@style/Widget.App.Theme.ActionMode</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_clear_black_24dp</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
+
+        <item name="android:textColorPrimary">@android:color/white</item>
+
+<!--        <item name="android:windowTranslucentStatus">true</item>-->
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="AppTheme">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <style name="Widget.App.Theme.ActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="titleTextStyle">?attr/textAppearanceHeadline6</item>
+        <item name="subtitleTextStyle">?attr/textAppearanceSubtitle1</item>
+        <item name="background">?attr/colorPrimary</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="TextAppearance.App.CollapsingToolbar.Expanded" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="TextAppearance.App.CollapsingToolbar.Collapsed" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
 
     <style name="ProductName">
         <item name="android:textSize">@dimen/font_large</item>
@@ -35,32 +54,6 @@
     <style name="ProductExpiryDanger">
         <item name="android:textSize">@dimen/font_normal</item>
         <item name="android:textColor">@color/red</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.NoActionBar.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="MyActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
-        <item name="background">@color/colorPrimary</item>
-        <item name="backgroundSplit">?attr/actionModeSplitBackground</item>
-        <item name="height">?attr/actionBarSize</item>
-        <item name="titleTextStyle">@style/TextAppearance.AppCompat.Widget.ActionMode.Title</item>
-        <item name="subtitleTextStyle">@style/TextAppearance.AppCompat.Widget.ActionMode.Subtitle
-        </item>
-        <item name="closeItemLayout">@layout/abc_action_mode_close_item_material</item>
-    </style>
-
-    <style name="ActionModeTheme" parent="AppTheme">
-        <item name="actionModeStyle">@style/MyActionModeStyle</item>
-        <item name="windowActionModeOverlay">true</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_clear_black_24dp</item>
-        <item name="actionMenuTextColor">@android:color/white</item>
     </style>
 
     <style name="StickyBottomButton" parent="Widget.AppCompat.Button.Colored">

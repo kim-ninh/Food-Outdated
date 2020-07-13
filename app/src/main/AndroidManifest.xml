@@ -18,7 +18,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme.NoActionBar"
+        android:theme="@style/AppTheme"
         >
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -30,7 +30,8 @@
                 android:resource="@xml/file_paths" />
         </provider>
         <activity android:name="com.ninh.foodoutdated.MainActivity"
-            android:theme="@style/ActionModeTheme">
+            android:windowSoftInputMode="stateHidden"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

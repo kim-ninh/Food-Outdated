@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
@@ -145,6 +148,11 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
             }
         }
 
+//        (requireActivity() as AppCompatActivity).setSupportActionBar(view.findViewById(R.id.toolBarFragProducts))
+//        (requireActivity() as AppCompatActivity).supportActionBar!!.title = "Main title here"
+//        val navController = findNavController()
+//        val appBarConfiguration = AppBarConfiguration(navController.graph)
+//        (requireActivity() as AppCompatActivity).setupActionBarWithNavController(navController, appBarConfiguration)
     }
 
     companion object {
