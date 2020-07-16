@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -16,8 +16,6 @@
         <item name="actionModeStyle">@style/Widget.App.Theme.ActionMode</item>
         <item name="actionModeCloseDrawable">@drawable/ic_clear_black_24dp</item>
         <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
-
-        <item name="android:textColorPrimary">@android:color/white</item>
 
 <!--        <item name="android:windowTranslucentStatus">true</item>-->
     </style>

@@ -2,10 +2,10 @@
 <resources>
     <color name="colorPrimary">@color/blue</color>
     <color name="colorPrimaryDark">@color/dark_blue</color>
-    <color name="colorAccent">@color/blue</color>
+    <color name="colorAccent">#dd7f20</color>
     <color name="green">#28a745</color>
     <color name="yellow">#ffc107</color>
     <color name="red">#dc3545</color>
-    <color name="blue">#0353A4</color>
+    <color name="blue">#207DDD</color>
     <color name="dark_blue">#061A40</color>
 </resources>

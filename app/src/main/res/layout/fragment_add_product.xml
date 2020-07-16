@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context=".newproduct.AddProductFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -30,6 +32,9 @@
                 android:id="@+id/product_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
                 android:alpha="0.1"
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/ic_waste" />
@@ -49,6 +54,7 @@
                 android:maxLines="1"
                 android:inputType="text"
                 app:backgroundTint="?attr/colorSurface"
+                android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
                 />
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -85,6 +91,9 @@
                 android:id="@+id/expiry_date_edit_text"
                 android:text="Some text"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
+                android:focusableInTouchMode="true"
+                android:focusable="true"
+                android:clickable="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Expiry date" />
