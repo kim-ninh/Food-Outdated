@@ -2,20 +2,19 @@ package com.ninh.foodoutdated.newproduct
 
 import android.app.Activity
 import android.app.DatePickerDialog
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
-import android.util.Log
+import android.text.format.DateFormat
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -23,30 +22,36 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.dialog.MaterialDialogs
+import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.*
-import com.ninh.foodoutdated.customview.DateEditText
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
+import com.orhanobut.logger.Logger
 import java.io.*
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.ExecutorService
 
 class AddProductFragment : Fragment(R.layout.fragment_add_product),
     View.OnFocusChangeListener,
-    DatePickerDialog.OnDateSetListener {
+    DatePickerDialog.OnDateSetListener,
+    AdapterView.OnItemSelectedListener {
 
     private val TAG = AddProductFragment::class.java.simpleName
 
     private val productEditText: EditText by lazy { findViewById<EditText>(R.id.product_edit_text) }
-    private val expiryDateEditText: TextView by lazy { findViewById<TextView>(R.id.expiry_date_edit_text) }
+    private val expiryDateTextView: TextView by lazy { findViewById<TextView>(R.id.expiry_date_edit_text) }
     private val productImageView: ImageView by lazy { findViewById<ImageView>(R.id.product_image_view) }
+    private val spinnerReminder: Spinner by lazy { findViewById<Spinner>(R.id.spinner_reminder) }
+    private val quantityTextView: TextView by lazy { findViewById<TextView>(R.id.textViewQuantity) }
+    private val numberPickerQuantity: NumberPicker by lazy { NumberPicker(requireContext()) }
+
     private val collapsingToolbarLayout: CollapsingToolbarLayout
             by lazy { findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbarLayout) }
+    private val coordinatorLayout: CoordinatorLayout by lazy {
+        requireActivity().findViewById<CoordinatorLayout>(R.id.coordinatorLayout)
+    }
 
     private val datePickerDialog: DatePickerDialog by lazy {
         val c = Calendar.getInstance()
@@ -59,12 +64,33 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product),
             year, month, day
         )
     }
+
+    private val quantityPickerDialog by lazy {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Quantity")
+            .setPositiveButton(resources.getString(android.R.string.ok)) { _, _ ->
+                quantityTextView.text = quantityArr[numberPickerQuantity.value]
+            }
+            .setView(numberPickerQuantity)
+            .create()
+    }
+
     private lateinit var productViewModel: ProductViewModel
 
     private var photoUri: Uri? = null
     private var photoFile: File? = null
+    private var productNameChangeConfirmed = false
 
-    private lateinit var executorService: ExecutorService
+    private val executorService by lazy {
+        (requireActivity().application as MyApplication)
+            .workerExecutor
+    }
+
+    private val quantityArr = generateSequence(1) { it + 1 }
+        .map { it.toString(10) }
+        .take(10)
+        .toList()
+        .toTypedArray()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -84,11 +110,10 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product),
         )
             .get(ProductViewModel::class.java)
 
-        executorService = (requireActivity().application as MyApplication).workerExecutor
-
         productEditText.setOnEditorActionListener { _, actionId, _ ->
             return@setOnEditorActionListener when (actionId) {
                 EditorInfo.IME_ACTION_DONE -> {
+                    productNameChangeConfirmed = true
                     productEditText.clearFocus()
                     updateEditTextAndToolBar()
                     false
@@ -100,28 +125,63 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product),
         toolBar.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.item_add -> {
-                    Toast.makeText(requireContext(), "Item add touched!", Toast.LENGTH_SHORT).show()
+                    if (validate()) {
+                        product?.let {
+                            productViewModel.insert(it)
+                        }
+                    }
+                    val action =
+                        AddProductFragmentDirections.actionAddProductFragmentToProductsFragment()
+                    findNavController().navigate(action)
                     true
                 }
                 else -> false
             }
         }
 
-        arrayOf(productEditText, expiryDateEditText, productImageView)
+        arrayOf(productEditText, expiryDateTextView, productImageView, quantityTextView)
             .forEach { focusableView ->
                 focusableView.onFocusChangeListener = this@AddProductFragment
             }
 
         productImageView.setOnClickListener { showImageActionDialog() }
-        expiryDateEditText.setOnClickListener { showDatePicker() }
+        expiryDateTextView.setOnClickListener { datePickerDialog.show() }
+
+        val spinnerReminderAdapter = ArrayAdapter
+            .createFromResource(
+                requireContext(),
+                R.array.spinner_reminder_items,
+                android.R.layout.simple_spinner_dropdown_item
+            )
+        spinnerReminder.adapter = spinnerReminderAdapter
+        spinnerReminder.onItemSelectedListener = this
+
+        numberPickerQuantity.minValue = 0
+        numberPickerQuantity.maxValue = quantityArr.size - 1
+        numberPickerQuantity.displayedValues = quantityArr
+
+        quantityTextView.setOnClickListener { quantityPickerDialog.show() }
+        setCurrentDateForTextView(expiryDateTextView)
     }
 
     override fun onFocusChange(v: View, hasFocus: Boolean) {
         if (v == productEditText) {
             if (hasFocus) {
+                productNameChangeConfirmed = false
+                productEditText.tag = collapsingToolbarLayout.title.toString()
                 collapsingToolbarLayout.hideTitle()
                 v.alpha = 1f
             } else {
+                if (!productNameChangeConfirmed) {
+                    Logger.i("Text ${productEditText.tag} saved!.")
+                    Snackbar.make(coordinatorLayout, "Updated name", Snackbar.LENGTH_LONG)
+                        .setAction("Undo") {
+                            Logger.i("Undo text to ${productEditText.tag}.")
+                            productEditText.setText(productEditText.tag.toString())
+                            collapsingToolbarLayout.title = productEditText.text.toString()
+                        }
+                        .show()
+                }
                 productEditText.hideSoftKeyboard()
                 updateEditTextAndToolBar()
             }
@@ -191,35 +251,12 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product),
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.add_product, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.item_add -> {
-                if (validate()) {
-                    product?.let {
-                        productViewModel.insert(it)
-                    }
-
-                    val action =
-                        AddProductFragmentDirections.actionAddProductFragmentToProductsFragment()
-                    findNavController().navigate(action)
-                }
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     private val product: Product?
         get() {
             var product: Product? = null
             try {
                 val productName = productEditText.text.toString()
-                val expiryDateStr = expiryDateEditText.text.toString()
+                val expiryDateStr = expiryDateTextView.text.toString()
                 val expiryDate =
                     SimpleDateFormat(getString(R.string.date_pattern_vn)).parse(expiryDateStr)
                 product = Product(name = productName, expiry = expiryDate, file = photoFile)
@@ -282,43 +319,26 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product),
 
     private fun validate(): Boolean {
         var isValid = true
-        val productName = productEditText.text.toString()
-        val expiryDate = expiryDateEditText.text.toString()
 
-        productEditText.error = null
-        if (productName.isEmpty() && isValid) {
-            Toast.makeText(requireContext(), R.string.error_message_empty_name, Toast.LENGTH_LONG)
-                .show()
+        val productName = productEditText.text
+        if (productName.isEmpty() || productName.isBlank()){
             isValid = false
         }
 
-        if (expiryDate.isEmpty() && isValid) {
-            Toast.makeText(requireContext(), R.string.error_message_empty_date, Toast.LENGTH_LONG)
-                .show()
-            isValid = false
-        }
-
-        if (photoFile == null && isValid) {
-            Toast.makeText(requireContext(), R.string.error_message_empty_photo, Toast.LENGTH_LONG)
-                .show()
-            isValid = false
-        }
         return isValid
     }
 
     private fun updateEditTextAndToolBar() {
-        if (productEditText.text.isEmpty() || productEditText.text.isBlank()) {
-            productEditText.setText(getString(R.string.untitled_product))
+        if (productEditText.text.isNotEmpty() && productEditText.text.isNotBlank()) {
+            collapsingToolbarLayout.title = productEditText.text
+        }else{
+            collapsingToolbarLayout.title = productEditText.tag.toString()
         }
-        collapsingToolbarLayout.title = productEditText.text
         productEditText.alpha = 0f
     }
 
     private fun showImageActionDialog() {
-        val productImageActions = arrayOf(
-            ProductImageAction(
-                "Remove photo", R.drawable.ic_clear_black_24dp, this::removePhotoFile
-            ),
+        val productImageActions = mutableListOf(
             ProductImageAction(
                 "Take photo",
                 R.drawable.ic_camera_alt_black_24dp,
@@ -327,34 +347,46 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product),
             ProductImageAction(
                 "Pick from gallery", R.drawable.ic_photo_black_24dp, this::selectImage
             )
-        )
+        ).apply {
+            if (photoFile != null) {
+                add(
+                    0, ProductImageAction(
+                        "Remove photo",
+                        R.drawable.ic_clear_black_24dp,
+                        this@AddProductFragment::removePhotoFile
+                    )
+                )
+            }
+        }
 
         val simpleDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Title")
+            .setTitle("Modify Image")
             .setAdapter(ProductImageActionAdapter(productImageActions)) { _, which ->
                 productImageActions[which].action.invoke()
             }
         simpleDialog.show()
     }
 
-    private fun showDatePicker() {
-//        val builder = MaterialDatePicker.Builder.datePicker().apply {
-//
-//        }
-//
-//        val picker = builder.build().apply {
-//            addOnPositiveButtonClickListener {
-//                expiryDateEditText.text = this.headerText
-//            }
-//        }
-//
-//        picker.show(childFragmentManager, picker.toString())
-
-        datePickerDialog.show()
+    override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
+        setDateForTextView(year, month, dayOfMonth, expiryDateTextView)
     }
 
-    override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
-        expiryDateEditText.text = "$dayOfMonth/$month/$year"
+    private fun setDateForTextView(
+        year: Int, month: Int, dayOfMonth: Int,
+        textView: TextView
+    ) {
+        val c = Calendar.getInstance()
+        c[year, month] = dayOfMonth
+        textView.text = DateFormat.format(getString(R.string.date_pattern_vn), c)
+    }
+
+    private fun setCurrentDateForTextView(textView: TextView) {
+        val c = Calendar.getInstance()
+        val year = c.get(Calendar.YEAR)
+        val month = c.get(Calendar.MONTH)
+        val day = c.get(Calendar.DAY_OF_MONTH)
+
+        setDateForTextView(year, month, day, textView)
     }
 
     companion object {
@@ -367,4 +399,9 @@ class AddProductFragment : Fragment(R.layout.fragment_add_product),
         fun newInstance() = AddProductFragment()
 
     }
+
+    override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) =
+        Unit
 }

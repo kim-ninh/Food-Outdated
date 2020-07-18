@@ -4,4 +4,11 @@
         <item>@string/pick_a_date</item>
         <item>@string/scan_from_camera</item>
     </string-array>
+
+    <string-array name="spinner_reminder_items">
+        <item>@string/spinner_reminder_a_week</item>
+        <item>@string/spinner_reminder_15_date</item>
+        <item>@string/spinner_reminder_a_month</item>
+        <item>@string/spinner_reminder_three_month</item>
+    </string-array>
 </resources>

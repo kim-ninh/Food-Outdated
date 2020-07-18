@@ -10,7 +10,7 @@ import com.bumptech.glide.Glide
 import com.ninh.foodoutdated.R
 
 class ProductImageActionAdapter(
-    private val productImageActions: Array<ProductImageAction>
+    private val productImageActions: List<ProductImageAction>
 ) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {

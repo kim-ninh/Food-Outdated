@@ -79,6 +79,7 @@ class ProductAdapter(
 
             Glide.with(productImageView)
                 .load(product.file)
+                .fallback(R.drawable.ic_waste)
                 .into(productImageView)
         }
 

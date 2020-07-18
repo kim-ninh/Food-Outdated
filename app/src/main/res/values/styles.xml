@@ -17,7 +17,7 @@
         <item name="actionModeCloseDrawable">@drawable/ic_clear_black_24dp</item>
         <item name="actionBarTheme">@style/ThemeOverlay.MaterialComponents.Dark.ActionBar</item>
 
-<!--        <item name="android:windowTranslucentStatus">true</item>-->
+        <!--        <item name="android:windowTranslucentStatus">true</item>-->
     </style>
 
     <style name="Widget.App.Theme.ActionMode" parent="Widget.AppCompat.ActionMode">

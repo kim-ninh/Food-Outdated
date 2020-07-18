@@ -4,9 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:orientation="vertical"
     tools:context=".newproduct.AddProductFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -18,24 +18,25 @@
             android:id="@+id/collapsingToolbarLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:title="@string/untitled_product"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:contentScrim="?attr/colorPrimary"
-            app:statusBarScrim="?attr/colorPrimaryVariant"
             app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
+            app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleGravity="bottom"
             app:expandedTitleMarginBottom="34dp"
             app:expandedTitleMarginStart="36dp"
-            app:expandedTitleGravity="bottom"
-            app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded">
+            app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:statusBarScrim="?attr/colorPrimaryVariant"
+            app:title="@string/untitled_product"
+            >
 
             <ImageView
                 android:id="@+id/product_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:alpha="0.1"
                 android:clickable="true"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:alpha="0.1"
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/ic_waste" />
 
@@ -44,17 +45,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:hint="@string/untitled_product"
-                android:imeOptions="actionDone"
-                android:textAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
                 android:layout_marginStart="32dp"
                 android:layout_marginEnd="32dp"
                 android:layout_marginBottom="16dp"
                 android:alpha="0"
-                android:maxLines="1"
+                android:hint="@string/untitled_product"
+                android:imeOptions="actionDone"
                 android:inputType="text"
-                app:backgroundTint="?attr/colorSurface"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
                 android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+                app:backgroundTint="?attr/colorSurface"
                 />
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -64,10 +65,9 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/transparent"
                 android:elevation="0dp"
-                app:menu="@menu/add_product"
-                app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
                 app:layout_collapseMode="pin"
-                />
+                app:menu="@menu/add_product"
+                app:navigationIcon="@drawable/ic_baseline_arrow_back_24" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -76,27 +76,10 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/spacing_normal"
-            android:layout_marginTop="@dimen/spacing_small"
-            android:layout_marginRight="@dimen/spacing_normal"
-            android:layout_marginBottom="@dimen/spacing_small"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/expiry_date_edit_text"
-                android:text="Some text"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Headline4"
-                android:focusableInTouchMode="true"
-                android:focusable="true"
-                android:clickable="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Expiry date" />
-        </LinearLayout>
+            android:layout_height="wrap_content">
+            <include layout="@layout/fragment_add_product_content" />
+        </ScrollView>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>
