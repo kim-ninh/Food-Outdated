@@ -38,4 +38,8 @@ class ProductViewModel(application: Application): AndroidViewModel(application) 
     fun deleteByIds(productIds: LongArray){
         repository.deleteProductsByIds(productIds)
     }
+
+    fun loadById(id: Long): LiveData<Product>{
+        return repository.loadProductById(id)
+    }
 }

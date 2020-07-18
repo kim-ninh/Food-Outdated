@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated.newproduct
+package com.ninh.foodoutdated.editproduct
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.ninh.foodoutdated.R
+import com.ninh.foodoutdated.editproduct.ProductImageAction
 
 class ProductImageActionAdapter(
     private val productImageActions: List<ProductImageAction>

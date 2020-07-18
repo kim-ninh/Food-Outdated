@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated.newproduct
+package com.ninh.foodoutdated.editproduct
 
 import androidx.annotation.DrawableRes
 

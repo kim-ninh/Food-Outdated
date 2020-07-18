@@ -17,6 +17,7 @@ import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.Product
 
 class ProductAdapter(
+    val onItemClickListener: ((Long) -> Unit)? = null
 ) : ListAdapter<Product, ProductAdapter.ProductViewHolder>(
     PRODUCT_DIFF_CALLBACK
 ) {
@@ -33,7 +34,7 @@ class ProductAdapter(
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val product = getItem(position)
-        holder.bind(product, tracker.isSelected(product.id))
+        holder.bind(product, tracker.isSelected(product.id), onItemClickListener)
     }
 
     fun getItemKey(position: Int): Long = getItem(position).id!!
@@ -67,10 +68,13 @@ class ProductAdapter(
             color
         }
 
-        fun bind(product: Product, isActive: Boolean) {
+        fun bind(product: Product, isActive: Boolean, onItemClickListener: ((Long) -> Unit)?) {
             itemView.isActivated = isActive
             productTextView.text = product.name
-            productExpiryTextView.text = DateFormat.format(itemView.resources.getString(R.string.date_pattern_vn), product.expiry)
+            productExpiryTextView.text = DateFormat.format(
+                itemView.resources.getString(R.string.date_pattern_vn),
+                product.expiry
+            )
             when (product.state) {
                 ExpiryState.NEW -> productExpiryTextView.setTextColor(GREEN_COLOR)
                 ExpiryState.EXPIRED -> productExpiryTextView.setTextColor(RED_COLOR)
@@ -81,9 +85,15 @@ class ProductAdapter(
                 .load(product.file)
                 .fallback(R.drawable.ic_waste)
                 .into(productImageView)
+
+            onItemClickListener?.let { listener ->
+                itemView.setOnClickListener {
+                    listener.invoke(product.id!!)
+                }
+            }
         }
 
-        fun getItemsDetails(key: Long): ItemDetailsLookup.ItemDetails<Long>{
+        fun getItemsDetails(key: Long): ItemDetailsLookup.ItemDetails<Long> {
             return object : ItemDetailsLookup.ItemDetails<Long>() {
                 override fun getSelectionKey(): Long? {
                     return key
@@ -98,10 +108,10 @@ class ProductAdapter(
     }
 }
 
-object PRODUCT_DIFF_CALLBACK : DiffUtil.ItemCallback<Product>(){
-    override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean
-            = oldItem.id == newItem.id
+object PRODUCT_DIFF_CALLBACK : DiffUtil.ItemCallback<Product>() {
+    override fun areItemsTheSame(oldItem: Product, newItem: Product): Boolean =
+        oldItem.id == newItem.id
 
-    override fun areContentsTheSame(oldItem: Product, newItem: Product): Boolean
-            = oldItem == newItem
+    override fun areContentsTheSame(oldItem: Product, newItem: Product): Boolean =
+        oldItem == newItem
 }

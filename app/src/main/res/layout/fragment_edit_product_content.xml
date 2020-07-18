@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    tools:showIn="@layout/fragment_add_product">
+    tools:showIn="@layout/fragment_edit_product">
 
-    <TextView
+    <com.ninh.foodoutdated.customview.DatePickerTextView
         android:id="@+id/expiry_date_edit_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.85" />
 
-    <TextView
+    <com.ninh.foodoutdated.customview.NumberPickerTextView
         android:id="@+id/textViewQuantity"
         android:focusableInTouchMode="true"
         android:focusable="true"

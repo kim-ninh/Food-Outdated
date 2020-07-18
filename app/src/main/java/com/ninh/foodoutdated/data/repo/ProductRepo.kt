@@ -39,4 +39,8 @@ class ProductRepo(
             _totalRowDeletedObserver.postValue(numOfRowAffected)
         }
     }
+
+    fun loadProductById(id: Long): LiveData<Product>{
+        return productDao.loadProductById(id)
+    }
 }

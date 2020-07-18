@@ -10,6 +10,9 @@ interface ProductDao {
     @Query("SELECT * FROM products ORDER BY expiry ASC")
     fun loadAllProducts(): LiveData<List<Product>>
 
+    @Query("SELECT * FROM products WHERE id = :productId LIMIT 1")
+    fun loadProductById(productId: Long): LiveData<Product>
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insertProduct(product: Product): Long
 

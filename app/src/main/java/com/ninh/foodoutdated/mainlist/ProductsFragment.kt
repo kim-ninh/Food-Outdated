@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.*
+import com.ninh.foodoutdated.editproduct.EditProductFragmentDirections
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
 
@@ -70,7 +71,10 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val productAdapter = ProductAdapter()
+        val productAdapter = ProductAdapter(){ productId ->
+            val action = ProductsFragmentDirections.actionProductsFragmentToEditProductFragment(productId)
+            findNavController().navigate(action)
+        }
         val itemSpacingInPixel = resources.getDimensionPixelSize(R.dimen.item_spacing)
 
         productRecyclerView = view.findViewById(R.id.products_recycler_view)

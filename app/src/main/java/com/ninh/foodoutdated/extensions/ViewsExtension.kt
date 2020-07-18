@@ -1,4 +1,4 @@
-package com.ninh.foodoutdated
+package com.ninh.foodoutdated.extensions
 
 import android.content.Context
 import android.view.View
