@@ -21,11 +21,14 @@ class DatePickerTextView
 ) : AppCompatTextView(context, attrs, defStyleAttr),
     DatePickerDialog.OnDateSetListener {
 
+    var onDatePickChanged: ((Calendar) -> Unit)? = null
+
     var datePicked: Calendar = Calendar.getInstance()
         set(value) {
             field = value
             datePickerDialog.updateDate(value.year, value.month, value.day)
             updateText(value)
+            onDatePickChanged?.invoke(field.clone() as Calendar)
         }
 
     private val datePickerDialog by lazy {
@@ -49,6 +52,7 @@ class DatePickerTextView
     override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
         datePicked.set(year, month, dayOfMonth)
         updateText()
+        onDatePickChanged?.invoke(datePicked.clone() as Calendar)
     }
 
     private fun updateText(){

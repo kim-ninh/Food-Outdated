@@ -29,6 +29,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.*
 import com.ninh.foodoutdated.customview.DatePickerTextView
 import com.ninh.foodoutdated.customview.NumberPickerTextView
+import com.ninh.foodoutdated.customview.ReminderPickerTextView
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.extensions.CalendarExtension
 import com.ninh.foodoutdated.extensions.findViewById
@@ -45,7 +46,8 @@ import java.util.*
 
 open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     View.OnFocusChangeListener,
-    AdapterView.OnItemSelectedListener, Toolbar.OnMenuItemClickListener {
+    AdapterView.OnItemSelectedListener,
+    Toolbar.OnMenuItemClickListener {
 
     private val TAG = EditProductFragment::class.java.simpleName
 
@@ -56,7 +58,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         )
     }
     protected val productImageView: ImageView by lazy { findViewById<ImageView>(R.id.product_image_view) }
-    protected val spinnerReminder: Spinner by lazy { findViewById<Spinner>(R.id.spinner_reminder) }
+    protected val reminderPickerTextView: ReminderPickerTextView by lazy { findViewById<ReminderPickerTextView>(R.id.textViewReminderPicker) }
     protected val quantityTextView: NumberPickerTextView by lazy {
         findViewById<NumberPickerTextView>(
             R.id.textViewQuantity
@@ -89,25 +91,29 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
     private val args: EditProductFragmentArgs by navArgs()
 
-    open fun inflateToolbarMenu(){
+    open fun inflateToolbarMenu() {
         toolBar.inflateMenu(R.menu.delete_product)
     }
 
-    open fun loadProductFromDB(){
+    open fun loadProductFromDB() {
         Log.i(TAG, "onViewCreated: received product id: ${args.productId}")
         productViewModel.loadById(args.productId)
-            .observe(viewLifecycleOwner){
-                collapsingToolbarLayout.title = it.name
-                productEditText.setText(it.name)
-
-                if (it.file == null) {
-                    loadPlaceholderImage()
-                }else{
-                    this.photoFile = it.file
-                    loadProductImage(it.file!!)
-                }
-                expiryDateTextView.datePicked = CalendarExtension.getCalendarInstanceFrom(it.expiry)
+            .observe(viewLifecycleOwner) {
+                updateUIs(it)
             }
+    }
+
+    private fun updateUIs(product: Product) {
+        collapsingToolbarLayout.title = product.name
+        productEditText.setText(product.name)
+
+        if (product.file == null) {
+            loadPlaceholderImage()
+        } else {
+            this.photoFile = product.file
+            loadProductImage(product.file!!)
+        }
+        expiryDateTextView.datePicked = CalendarExtension.getCalendarInstanceFrom(product.expiry)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -143,21 +149,15 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             }
         }
 
-        arrayOf(productEditText, expiryDateTextView, productImageView, quantityTextView)
+        arrayOf(productEditText, expiryDateTextView, productImageView, quantityTextView, reminderPickerTextView)
             .forEach { focusableView ->
                 focusableView.onFocusChangeListener = this@EditProductFragment
             }
 
-        val spinnerReminderAdapter = ArrayAdapter
-            .createFromResource(
-                requireContext(),
-                R.array.spinner_reminder_items,
-                android.R.layout.simple_spinner_dropdown_item
-            )
-        spinnerReminder.adapter = spinnerReminderAdapter
-        spinnerReminder.onItemSelectedListener = this
-
         quantityTextView.displayedValues = quantityArr
+        expiryDateTextView.onDatePickChanged = { datePicked ->
+            reminderPickerTextView.expiryDate = datePicked
+        }
 
         loadProductFromDB()
     }

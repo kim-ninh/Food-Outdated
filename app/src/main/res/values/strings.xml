@@ -11,16 +11,22 @@
     <string name="untitled_product">Untitled</string>
 
     <!-- spinner reminder array -->
-    <string name="spinner_reminder_a_week">a week</string>
-    <string name="spinner_reminder_15_date">15 date</string>
-    <string name="spinner_reminder_a_month">a month</string>
-    <string name="spinner_reminder_three_month">3 month</string>
+    <string name="a_week">A week</string>
+    <string name="fifteen_date">15 date</string>
+    <string name="a_month">A month</string>
+    <string name="three_month">3 month</string>
+
+    <string name="does_not_repeat">Does not repeat</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!--    Date format for text view -->
     <string name="date_pattern_vn">dd/MM/yyyy</string>
     <string name="sql_date_pattern">yyyy-mm-dd</string>
+    <string name="reminder_date_pattern">MMM dd, yyyy</string>
 
     <string name="icon_credit">Icons made by <a href="https://www.flaticon.com/authors/fjstudio" title="fjstudio">fjstudio</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a></string>
 </resources>
