@@ -4,8 +4,7 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.selection.ItemDetailsLookup
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DiffUtil
@@ -15,9 +14,10 @@ import com.bumptech.glide.Glide
 import com.ninh.foodoutdated.data.models.ExpiryState
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.Product
+import com.ninh.foodoutdated.databinding.ProductItemBinding
 
 class ProductAdapter(
-    val onItemClickListener: ((Long) -> Unit)? = null
+    private val onItemClickListener: ((Long) -> Unit)? = null
 ) : ListAdapter<Product, ProductAdapter.ProductViewHolder>(
     PRODUCT_DIFF_CALLBACK
 ) {
@@ -49,46 +49,35 @@ class ProductAdapter(
 
     class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        private val productImageView: ImageView = itemView.findViewById(R.id.product_thumbnail)
-        private val productTextView: TextView = itemView.findViewById(R.id.product_name)
-        private val productExpiryTextView: TextView = itemView.findViewById(R.id.product_expiry)
+        private val binding: ProductItemBinding = ProductItemBinding.bind(itemView)
 
-        private val GREEN_COLOR by lazy {
-            val color = itemView.resources.getColor(R.color.green)
-            color
-        }
-
-        private val RED_COLOR by lazy {
-            val color = itemView.resources.getColor(R.color.red)
-            color
-        }
-
-        private val YELLOW_COLOR by lazy {
-            val color = itemView.resources.getColor(R.color.yellow)
-            color
-        }
+        private val GREEN_COLOR by lazy { ContextCompat.getColor(itemView.context, R.color.green) }
+        private val RED_COLOR by lazy { ContextCompat.getColor(itemView.context, R.color.red) }
+        private val YELLOW_COLOR by lazy { ContextCompat.getColor(itemView.context, R.color.yellow) }
 
         fun bind(product: Product, isActive: Boolean, onItemClickListener: ((Long) -> Unit)?) {
-            itemView.isActivated = isActive
-            productTextView.text = product.name
-            productExpiryTextView.text = DateFormat.format(
-                itemView.resources.getString(R.string.date_pattern_vn),
-                product.expiryDate
-            )
-            when (product.state) {
-                ExpiryState.NEW -> productExpiryTextView.setTextColor(GREEN_COLOR)
-                ExpiryState.EXPIRED -> productExpiryTextView.setTextColor(RED_COLOR)
-                ExpiryState.NEARLY_EXPIRY -> productExpiryTextView.setTextColor(YELLOW_COLOR)
-            }
+            with(binding) {
+                itemView.isActivated = isActive
+                name.text = product.name
+                expiry.text = DateFormat.format(
+                    itemView.resources.getString(R.string.date_pattern_vn),
+                    product.expiryDate
+                )
+                when (product.state) {
+                    ExpiryState.NEW -> expiry.setTextColor(GREEN_COLOR)
+                    ExpiryState.EXPIRED -> expiry.setTextColor(RED_COLOR)
+                    ExpiryState.NEARLY_EXPIRY -> expiry.setTextColor(YELLOW_COLOR)
+                }
 
-            Glide.with(productImageView)
-                .load(product.file)
-                .fallback(R.drawable.ic_waste)
-                .into(productImageView)
+                Glide.with(thumbnail)
+                    .load(product.file)
+                    .fallback(R.drawable.ic_waste)
+                    .into(thumbnail)
 
-            onItemClickListener?.let { listener ->
-                itemView.setOnClickListener {
-                    listener.invoke(product.id!!)
+                onItemClickListener?.let { listener ->
+                    itemView.setOnClickListener {
+                        listener.invoke(product.id!!)
+                    }
                 }
             }
         }

@@ -15,7 +15,7 @@ import com.ninh.foodoutdated.mainlist.ProductsFragment
 class AddProductFragment : EditProductFragment() {
 
     override fun inflateToolbarMenu() {
-        toolBar.inflateMenu(R.menu.add_product)
+        binding.toolbar.inflateMenu(R.menu.add_product)
     }
 
     override fun loadProductFromDB() = Unit
@@ -27,7 +27,7 @@ class AddProductFragment : EditProductFragment() {
                     productViewModel.insert(
                         ProductAndRemindInfo(
                             product,
-                            reminderPickerTextView.remindInfo
+                            binding.content.reminder.remindInfo
                         )
                     ).observe(this) {
                         Log.i(
@@ -53,8 +53,8 @@ class AddProductFragment : EditProductFragment() {
     private fun validate(): Boolean {
         var isValid = true
 
-        val productName = productEditText.text
-        if (productName.isEmpty() || productName.isBlank()) {
+        val productName = binding.name.text
+        if (productName!!.isEmpty() || productName.isBlank()) {
             isValid = false
         }
 

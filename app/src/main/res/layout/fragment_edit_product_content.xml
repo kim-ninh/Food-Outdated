@@ -8,7 +8,7 @@
     tools:showIn="@layout/fragment_edit_product">
 
     <com.ninh.foodoutdated.customview.DatePickerTextView
-        android:id="@+id/expiry_date_edit_text"
+        android:id="@+id/expiry"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:clickable="true"
@@ -54,7 +54,7 @@
         app:layout_constraintTop_toTopOf="@+id/imageView4" />
 
     <com.ninh.foodoutdated.customview.ReminderPickerTextView
-        android:id="@+id/textViewReminderPicker"
+        android:id="@+id/reminder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
@@ -82,7 +82,7 @@
         app:layout_constraintGuide_percent="0.85" />
 
     <com.ninh.foodoutdated.customview.NumberPickerTextView
-        android:id="@+id/textViewQuantity"
+        android:id="@+id/quantity"
         android:focusableInTouchMode="true"
         android:focusable="true"
         android:clickable="true"

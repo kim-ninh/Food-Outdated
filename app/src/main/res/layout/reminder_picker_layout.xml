@@ -7,7 +7,7 @@
     android:padding="16dp">
 
     <Spinner
-        android:id="@+id/spinnerTriggerDate"
+        android:id="@+id/trigger_date_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:entries="@array/spinner_trigger_date"
@@ -16,12 +16,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
-        android:id="@+id/spinnerRepeatType"
+        android:id="@+id/repeat_type_spinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:entries="@array/spinner_repeating_type"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerTriggerDate" />
+        app:layout_constraintTop_toBottomOf="@+id/trigger_date_spinner" />
 </androidx.constraintlayout.widget.ConstraintLayout>

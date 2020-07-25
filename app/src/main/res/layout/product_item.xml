@@ -13,7 +13,7 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/product_thumbnail"
+            android:id="@+id/thumbnail"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
@@ -27,26 +27,26 @@
             tools:src="@tools:sample/avatars" />
 
         <TextView
-            android:id="@+id/product_name"
+            android:id="@+id/name"
             style="@style/ProductName"
             android:layout_width="0dp"
             android:layout_height="32dp"
             android:layout_marginEnd="56dp"
             android:gravity="bottom"
-            app:layout_constraintBottom_toTopOf="@+id/product_expiry"
+            app:layout_constraintBottom_toTopOf="@+id/expiry"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/guideline"
             tools:text="Product name" />
 
         <TextView
-            android:id="@+id/product_expiry"
+            android:id="@+id/expiry"
             android:layout_width="0dp"
             android:layout_height="20dp"
             android:gravity="bottom"
 
             app:layout_constraintBottom_toTopOf="@+id/guideline4"
-            app:layout_constraintEnd_toEndOf="@+id/product_name"
-            app:layout_constraintStart_toStartOf="@+id/product_name"
+            app:layout_constraintEnd_toEndOf="@+id/name"
+            app:layout_constraintStart_toStartOf="@+id/name"
             tools:text="@tools:sample/date/ddmmyy" />
 
         <androidx.constraintlayout.widget.Guideline

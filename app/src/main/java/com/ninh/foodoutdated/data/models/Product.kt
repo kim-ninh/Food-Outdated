@@ -9,12 +9,12 @@ import kotlin.math.exp
 
 @Entity(tableName = "products")
 data class Product(
-    @PrimaryKey(autoGenerate = true) val id: Long? = null,
     var name: String = "",
     var quantity: Int = 1,
     var expiryDate: Calendar = Calendar.getInstance(),
     var file: File? = null,
-    var isValid: Boolean = true
+    var isValid: Boolean = true,
+    @PrimaryKey(autoGenerate = true) val id: Long? = null
 ) {
 
     val state: ExpiryState

@@ -29,8 +29,8 @@ class ReminderPickerTextView
     private val triggerDate: Calendar = Calendar.getInstance()
 
     init {
-        spinnerTriggerDate = dialogView.findViewById(R.id.spinnerTriggerDate)
-        spinnerRepeatingType = dialogView.findViewById(R.id.spinnerRepeatType)
+        spinnerTriggerDate = dialogView.findViewById(R.id.trigger_date_spinner)
+        spinnerRepeatingType = dialogView.findViewById(R.id.repeat_type_spinner)
     }
 
     var remindInfo: RemindInfo = RemindInfo()
@@ -113,11 +113,11 @@ class ReminderPickerTextView
 
     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
         val item = parent.getItemAtPosition(position).toString()
-        if (parent.id == R.id.spinnerTriggerDate) {
+        if (parent.id == R.id.trigger_date_spinner) {
             updateTriggerDate(item)
         }
 
-        if (parent.id == R.id.spinnerRepeatType) {
+        if (parent.id == R.id.repeat_type_spinner) {
             remindInfo.repeating = with(resources) {
                 when (item) {
                     getString(R.string.does_not_repeat) -> RepeatingType.NO_REPEAT

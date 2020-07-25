@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
@@ -20,15 +21,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.*
+import com.ninh.foodoutdated.databinding.FragmentProductsBinding
 import com.ninh.foodoutdated.editproduct.EditProductFragmentDirections
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
 
 class ProductsFragment : Fragment(R.layout.fragment_products) {
 
-    private lateinit var productViewModel: ProductViewModel
-    private lateinit var productRecyclerView: RecyclerView
+    private val productViewModel: ProductViewModel by viewModels {
+        ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
+    }
     private lateinit var selectionTracker: SelectionTracker<Long>
+
+    private var _binding: FragmentProductsBinding? = null
+    private val binding
+        get() = _binding!!
 
     private var actionMode: ActionMode? = null
 
@@ -72,26 +79,26 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val productAdapter = ProductAdapter(){ productId ->
-            val action = ProductsFragmentDirections.actionProductsFragmentToEditProductFragment(productId)
+        _binding = FragmentProductsBinding.bind(view)
+        val productAdapter = ProductAdapter() { productId ->
+            val action =
+                ProductsFragmentDirections.actionProductsFragmentToEditProductFragment(productId)
             findNavController().navigate(action)
         }
         val itemSpacingInPixel = resources.getDimensionPixelSize(R.dimen.item_spacing)
 
-        productRecyclerView = view.findViewById(R.id.products_recycler_view)
-        productRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        productRecyclerView.adapter = productAdapter
-        productRecyclerView.addItemDecoration(
-            SpacingItemDecoration(
-                itemSpacingInPixel
-            )
-        )
+        binding.productsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = productAdapter
+            addItemDecoration(SpacingItemDecoration(itemSpacingInPixel))
+        }
+
         selectionTracker = SelectionTracker.Builder(
             "product-selection-id",
-            productRecyclerView,
+            binding.productsRecyclerView,
             ProductItemKeyProvider(productAdapter),
             ProductItemDetailsLookup(
-                productRecyclerView
+                binding.productsRecyclerView
             ),
             StorageStrategy.createLongStorage()
         )
@@ -117,12 +124,6 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
         productAdapter.tracker = selectionTracker
 
-        productViewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
-        )
-            .get(ProductViewModel::class.java)
-
         productViewModel.run {
             allProducts.observe(
                 viewLifecycleOwner
@@ -136,10 +137,9 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
             ) { totalRow ->
                 actionMode?.finish()
                 Snackbar.make(
-                    requireActivity().findViewById(R.id.coordinatorLayout), "Deleted $totalRow item",
-                    Snackbar.LENGTH_LONG
+                    binding.root, "Deleted $totalRow item", Snackbar.LENGTH_LONG
                 )
-                    .setAction("Undo"){}.show()
+                    .setAction("Undo") {}.show()
             }
         }
 
@@ -148,6 +148,11 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 //        val navController = findNavController()
 //        val appBarConfiguration = AppBarConfiguration(navController.graph)
 //        (requireActivity() as AppCompatActivity).setupActionBarWithNavController(navController, appBarConfiguration)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
