@@ -8,13 +8,15 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.format.DateFormat
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -26,24 +28,18 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.ninh.foodoutdated.*
-import com.ninh.foodoutdated.customview.DatePickerTextView
-import com.ninh.foodoutdated.customview.NumberPickerTextView
-import com.ninh.foodoutdated.customview.ReminderPickerTextView
+import com.ninh.foodoutdated.MyApplication
+import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.databinding.FragmentEditProductBinding
-import com.ninh.foodoutdated.extensions.findViewById
 import com.ninh.foodoutdated.extensions.hideSoftKeyboard
 import com.ninh.foodoutdated.extensions.hideTitle
-
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
 import java.util.*
 
 open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
@@ -86,6 +82,39 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         .take(10)
         .toList()
         .toTypedArray()
+
+    private var actionMode: ActionMode? = null
+
+    private var actionModeCallback: ActionMode.Callback = object : ActionMode.Callback{
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            return when(item.itemId){
+                R.id.confirm_button -> {
+                    productNameChangeConfirmed = true
+                    actionMode?.finish()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            val inflater = mode.menuInflater
+            inflater.inflate(R.menu.edit_name, menu)
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.title = "Edit name"
+            return true
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            actionMode = null
+            if (binding.name.isFocused){
+                binding.name.clearFocus()
+            }
+        }
+    }
 
     open fun inflateToolbarMenu() {
         binding.toolbar.inflateMenu(R.menu.delete_product)
@@ -137,7 +166,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                     EditorInfo.IME_ACTION_DONE -> {
                         productNameChangeConfirmed = true
                         name.clearFocus()
-                        updateEditTextAndToolBar()
+                        actionMode?.finish()
                         false
                     }
                     else -> false
@@ -170,6 +199,13 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                 name.tag = collapsingToolbarLayout.title.toString()
                 collapsingToolbarLayout.hideTitle()
                 v.alpha = 1f
+
+                if (actionMode == null){
+                    actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(
+                        actionModeCallback
+                    )
+                }
+                actionMode?.invalidate()
             } else {
                 if (!productNameChangeConfirmed) {
                     Logger.i("Text ${name.tag} saved!.")
@@ -266,7 +302,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         }
 
     private fun createImageFile(): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val timeStamp = DateFormat.format("yyyyMMdd_HHmmss", Calendar.getInstance())
         val storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val productDir = File(storageDir, "products")
         if (!productDir.exists()) {

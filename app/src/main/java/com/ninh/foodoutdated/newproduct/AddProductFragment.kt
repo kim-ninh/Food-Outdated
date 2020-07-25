@@ -1,16 +1,12 @@
 package com.ninh.foodoutdated.newproduct
 
-import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.view.View
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
 import com.ninh.foodoutdated.editproduct.EditProductFragment
-import com.ninh.foodoutdated.mainlist.ProductsFragment
 
 class AddProductFragment : EditProductFragment() {
 
