@@ -73,7 +73,7 @@ class ProductAdapter(
             productTextView.text = product.name
             productExpiryTextView.text = DateFormat.format(
                 itemView.resources.getString(R.string.date_pattern_vn),
-                product.expiry
+                product.expiryDate
             )
             when (product.state) {
                 ExpiryState.NEW -> productExpiryTextView.setTextColor(GREEN_COLOR)

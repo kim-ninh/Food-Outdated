@@ -24,6 +24,7 @@ class NumberPickerTextView
     var currentValue = 0
         set(value) {
             numberPicker.value = value
+            updateText()
             field = value
         }
 
@@ -41,10 +42,15 @@ class NumberPickerTextView
     private val numberPickerDialog by lazy {
         MaterialAlertDialogBuilder(context)
             .setPositiveButton(resources.getString(android.R.string.ok)) { _, _ ->
-                this.text = displayedValues[numberPicker.value]
+                updateText()
+                currentValue = numberPicker.value
             }
             .setView(numberPicker)
             .create()
+    }
+
+    private fun updateText() {
+        this.text = displayedValues[numberPicker.value]
     }
 
     override fun performClick(): Boolean {

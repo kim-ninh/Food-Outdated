@@ -26,7 +26,7 @@ class ReminderPickerTextView
         LayoutInflater.from(context).inflate(R.layout.reminder_picker_layout, null)
     private val spinnerTriggerDate: Spinner
     private val spinnerRepeatingType: Spinner
-    private var triggerDate: Calendar = Calendar.getInstance()
+    private val triggerDate: Calendar = Calendar.getInstance()
 
     init {
         spinnerTriggerDate = dialogView.findViewById(R.id.spinnerTriggerDate)
@@ -58,24 +58,28 @@ class ReminderPickerTextView
             }
 
             enumValues<RepeatingType>().forEachIndexed { index, repeatingType ->
-                if (value.repeating == repeatingType){
+                if (value.repeating == repeatingType) {
                     spinnerRepeatingType.setSelection(index)
                 }
             }
 
         }
 
-    var expiryDate: Calendar = Calendar.getInstance()
+    private val _expiryDate: Calendar = Calendar.getInstance()
+    var expiryDate: Calendar
         set(value) {
-            field = (value.clone() as Calendar)
+            _expiryDate.timeInMillis = value.timeInMillis
             updateTriggerDate(spinnerTriggerDate.selectedItem.toString())
+        }
+        get() {
+            return _expiryDate.clone() as Calendar
         }
 
     private val reminderPickerDialog by lazy {
         MaterialAlertDialogBuilder(context)
             .setTitle("Edit reminder")
             .setPositiveButton(resources.getString(android.R.string.ok)) { _, _ ->
-                remindInfo.triggerDate = triggerDate.clone() as Calendar
+                remindInfo.triggerDate.timeInMillis = triggerDate.timeInMillis
                 remindInfo.triggerDate.set(Calendar.HOUR, 8)
                 remindInfo.triggerDate.set(Calendar.MINUTE, 0)
                 remindInfo.triggerDate.set(Calendar.SECOND, 0)
@@ -127,24 +131,13 @@ class ReminderPickerTextView
     }
 
     private fun updateTriggerDate(timeBeforeExpiry: String) {
-        triggerDate = with(resources) {
-            val expiryDateClone = expiryDate.clone() as Calendar
-
-            when (timeBeforeExpiry) {
-                getString(R.string.a_week) -> expiryDateClone.apply {
-                    add(
-                        Calendar.DAY_OF_MONTH,
-                        -7
-                    )
-                }
-                getString(R.string.fifteen_date) -> expiryDateClone.apply {
-                    add(
-                        Calendar.DAY_OF_MONTH,
-                        -15
-                    )
-                }
-                getString(R.string.a_month) -> expiryDateClone.apply { add(Calendar.MONTH, -1) }
-                getString(R.string.three_month) -> expiryDateClone.apply { add(Calendar.MONTH, -3) }
+        triggerDate.timeInMillis = expiryDate.timeInMillis
+        with(resources){
+            when(timeBeforeExpiry){
+                getString(R.string.a_week) -> triggerDate.add(Calendar.DAY_OF_MONTH, -7)
+                getString(R.string.fifteen_date) -> triggerDate.add(Calendar.DAY_OF_MONTH, -15)
+                getString(R.string.a_month) -> triggerDate.add(Calendar.MONTH, -1)
+                getString(R.string.three_month) -> triggerDate.add(Calendar.MONTH, -3)
                 else -> throw RuntimeException("Trigger date not valid")
             }
         }

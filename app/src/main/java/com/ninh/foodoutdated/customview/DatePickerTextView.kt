@@ -23,19 +23,22 @@ class DatePickerTextView
 
     var onDatePickChanged: ((Calendar) -> Unit)? = null
 
-    var datePicked: Calendar = Calendar.getInstance()
+    private val _datePicked: Calendar = Calendar.getInstance()
+    var datePicked: Calendar
         set(value) {
-            field = value
-            datePickerDialog.updateDate(value.year, value.month, value.day)
-            updateText(value)
-            onDatePickChanged?.invoke(field.clone() as Calendar)
+            _datePicked.timeInMillis = value.timeInMillis
+            datePickerDialog.updateDate(_datePicked.year, _datePicked.month, _datePicked.day)
+            updateText()
+            onDatePickChanged?.invoke(_datePicked.clone() as Calendar)
+        }
+        get() {
+            return _datePicked.clone() as Calendar
         }
 
     private val datePickerDialog by lazy {
-        val today = Calendar.getInstance()
         DatePickerDialog(
             context, this,
-            today.year, today.month, today.day
+            _datePicked.year, _datePicked.month, _datePicked.day
         )
     }
 
@@ -50,16 +53,12 @@ class DatePickerTextView
     }
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
-        datePicked.set(year, month, dayOfMonth)
+        _datePicked.set(year, month, dayOfMonth)
         updateText()
-        onDatePickChanged?.invoke(datePicked.clone() as Calendar)
+        onDatePickChanged?.invoke(_datePicked.clone() as Calendar)
     }
 
-    private fun updateText(){
-        updateText(datePicked)
-    }
-
-    private fun updateText(calendar: Calendar) {
-        this.text = DateFormat.format(resources.getString(R.string.date_pattern_vn), calendar)
+    private fun updateText() {
+        this.text = DateFormat.format(resources.getString(R.string.date_pattern_vn), _datePicked)
     }
 }

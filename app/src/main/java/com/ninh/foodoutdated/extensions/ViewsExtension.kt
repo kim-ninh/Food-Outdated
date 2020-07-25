@@ -1,16 +1,15 @@
 package com.ninh.foodoutdated.extensions
 
-import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.annotation.IdRes
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.CollapsingToolbarLayout
 
 fun EditText.hideSoftKeyboard() {
-    val imm: InputMethodManager? = this.context
-        .getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+    val imm = ContextCompat.getSystemService(this.context, InputMethodManager::class.java)
 
     if (imm != null && imm.isActive(this)){
         imm.hideSoftInputFromWindow(windowToken, 0)

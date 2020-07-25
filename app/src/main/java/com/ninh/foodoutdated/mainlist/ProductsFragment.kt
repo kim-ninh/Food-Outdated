@@ -1,6 +1,7 @@
 package com.ninh.foodoutdated.mainlist
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
@@ -117,7 +118,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         productAdapter.tracker = selectionTracker
 
         productViewModel = ViewModelProvider(
-            requireActivity(),
+            this,
             ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
         )
             .get(ProductViewModel::class.java)
@@ -128,16 +129,6 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
             ) { products ->
                 Logger.i("Product changed!: ${products.size}")
                 productAdapter.submitList(products)
-            }
-
-            newProductId.observe(
-                viewLifecycleOwner
-            ) { newId ->
-                Snackbar.make(
-                    requireActivity().findViewById(R.id.coordinatorLayout), "Add product successful",
-                    Snackbar.LENGTH_LONG
-                )
-                    .show()
             }
 
             totalRowDeleted.observe(
@@ -160,8 +151,6 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
     }
 
     companion object {
-        @JvmStatic
-        fun newInstance() =
-            ProductsFragment()
+        val TAG = ProductsFragment::class.java.simpleName
     }
 }

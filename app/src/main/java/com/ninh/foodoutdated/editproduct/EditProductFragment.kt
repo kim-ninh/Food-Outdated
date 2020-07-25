@@ -37,6 +37,7 @@ import com.ninh.foodoutdated.extensions.hideSoftKeyboard
 import com.ninh.foodoutdated.extensions.hideTitle
 
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
+import com.ninh.foodoutdated.viewmodels.RemindInfoViewModel
 import com.orhanobut.logger.Logger
 import java.io.File
 import java.io.FileOutputStream
@@ -58,7 +59,11 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         )
     }
     protected val productImageView: ImageView by lazy { findViewById<ImageView>(R.id.product_image_view) }
-    protected val reminderPickerTextView: ReminderPickerTextView by lazy { findViewById<ReminderPickerTextView>(R.id.textViewReminderPicker) }
+    protected val reminderPickerTextView: ReminderPickerTextView by lazy {
+        findViewById<ReminderPickerTextView>(
+            R.id.textViewReminderPicker
+        )
+    }
     protected val quantityTextView: NumberPickerTextView by lazy {
         findViewById<NumberPickerTextView>(
             R.id.textViewQuantity
@@ -97,23 +102,28 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
     open fun loadProductFromDB() {
         Log.i(TAG, "onViewCreated: received product id: ${args.productId}")
-        productViewModel.loadById(args.productId)
+
+        productViewModel.loadProductAndRemindInfo(args.productId)
             .observe(viewLifecycleOwner) {
-                updateUIs(it)
+                updateUIs(it.product)
+                reminderPickerTextView.expiryDate = it.product.expiryDate
+                reminderPickerTextView.remindInfo = it.remindInfo
             }
     }
 
-    private fun updateUIs(product: Product) {
+    protected fun updateUIs(product: Product) {
+        val quantityIndex = quantityArr.indexOf(product.quantity.toString())
+
         collapsingToolbarLayout.title = product.name
         productEditText.setText(product.name)
-
+        quantityTextView.currentValue = quantityIndex
         if (product.file == null) {
             loadPlaceholderImage()
         } else {
             this.photoFile = product.file
             loadProductImage(product.file!!)
         }
-        expiryDateTextView.datePicked = CalendarExtension.getCalendarInstanceFrom(product.expiry)
+        expiryDateTextView.datePicked = product.expiryDate
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -124,7 +134,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         }
 
         productViewModel = ViewModelProvider(
-            requireActivity(),
+            this,
             ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
         )
             .get(ProductViewModel::class.java)
@@ -149,7 +159,13 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             }
         }
 
-        arrayOf(productEditText, expiryDateTextView, productImageView, quantityTextView, reminderPickerTextView)
+        arrayOf(
+            productEditText,
+            expiryDateTextView,
+            productImageView,
+            quantityTextView,
+            reminderPickerTextView
+        )
             .forEach { focusableView ->
                 focusableView.onFocusChangeListener = this@EditProductFragment
             }
@@ -263,18 +279,19 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         }
     }
 
-    protected val product: Product?
+    protected val product: Product
         get() {
-            var product: Product? = null
-            try {
-                val productName = productEditText.text.toString()
-                val expiryDateStr = expiryDateTextView.text.toString()
-                val expiryDate =
-                    SimpleDateFormat(getString(R.string.date_pattern_vn)).parse(expiryDateStr)
-                product = Product(name = productName, expiry = expiryDate, file = photoFile)
-            } catch (e: ParseException) {
-                e.printStackTrace()
-            }
+            val product: Product
+            val productName = productEditText.text.toString()
+            val quantity = quantityArr[quantityTextView.currentValue].toInt()
+            val expiryDate = expiryDateTextView.datePicked
+            product = Product(
+                name = productName,
+                quantity = quantity,
+                expiryDate = expiryDate,
+                file = photoFile
+            )
+
             return product
         }
 

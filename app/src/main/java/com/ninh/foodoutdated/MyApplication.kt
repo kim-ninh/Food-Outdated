@@ -1,6 +1,9 @@
 package com.ninh.foodoutdated
 
 import android.app.Application
+import com.ninh.foodoutdated.data.ProductDatabase
+import com.ninh.foodoutdated.data.dao.ProductDao
+import com.ninh.foodoutdated.data.dao.RemindInfoDao
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.Logger
 import java.util.concurrent.ExecutorService
