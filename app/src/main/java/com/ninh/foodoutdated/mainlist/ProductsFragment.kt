@@ -40,13 +40,13 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
             return when (item.itemId) {
                 R.id.item_delete -> {
                     val selection = selectionTracker.selection
-                    val selectedIds = LongArray(selection.size())
+                    val selectedIds = IntArray(selection.size())
                     val it: Iterator<Long> = selection.iterator()
                     var i = 0
                     while (it.hasNext()) {
-                        selectedIds[i++] = it.next()
+                        selectedIds[i++] = it.next().toInt()
                     }
-                    productViewModel.deleteByIds(selectedIds)
+                    productViewModel.delete(selectedIds)
                     true
                 }
                 else -> false
@@ -100,6 +100,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         )
             .withSelectionPredicate(SelectionPredicates.createSelectAnything())
             .build()
+        StorageStrategy.createLongStorage()
 
         selectionTracker.addObserver(object : SelectionTracker.SelectionObserver<Long>() {
             override fun onSelectionChanged() {

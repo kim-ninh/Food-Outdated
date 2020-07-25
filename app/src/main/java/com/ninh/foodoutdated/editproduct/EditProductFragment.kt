@@ -125,11 +125,11 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     open fun loadProductFromDB() {
         Log.i(TAG, "onViewCreated: received product id: ${args.productId}")
 
-        productViewModel.loadProductAndRemindInfo(args.productId)
+        productViewModel.load(args.productId)
             .observe(viewLifecycleOwner) {
                 updateUIs(it.product)
                 binding.content.reminder.apply {
-                    expiryDate = it.product.expiryDate
+                    expiryDate = it.product.expiry
                     remindInfo = it.remindInfo
                 }
             }
@@ -141,9 +141,9 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         collapsingToolbarLayout.title = product.name
         name.setText(product.name)
         content.quantity.currentValue = quantityIndex
-        content.expiry.datePicked = product.expiryDate
+        content.expiry.datePicked = product.expiry
 
-        loadProductImage(product.file)
+        loadProductImage(product.thumb)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

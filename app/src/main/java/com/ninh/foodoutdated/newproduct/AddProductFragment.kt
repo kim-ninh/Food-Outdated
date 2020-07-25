@@ -27,10 +27,10 @@ class AddProductFragment : EditProductFragment() {
                             product,
                             binding.content.reminder.remindInfo
                         )
-                    ).observe(this) {
+                    ).observe(this) {newId ->
                         Log.i(
                             TAG,
-                            "product inserted, id: ${it.first} remind info request code: ${it.second}"
+                            "product inserted, id: $newId"
                         )
 
                         findNavController()

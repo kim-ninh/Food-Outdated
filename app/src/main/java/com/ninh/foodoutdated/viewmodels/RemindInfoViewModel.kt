@@ -21,19 +21,5 @@ class RemindInfoViewModel(application: Application) : AndroidViewModel(applicati
 
     val allRemindInfo: LiveData<List<RemindInfo>> = repository.allRemindInfo
 
-    fun insert(remindInfo: RemindInfo){
-        repository.insertRemindInfo(remindInfo)
-    }
-
-    fun deleteByRequestCode(code: Int){
-        repository.deleteRemindInfo(code)
-    }
-
-    fun loadByRequestCode(code: Int) = repository.loadByRequestCode(code)
-
-    fun loadByProductOwnerId(id: Long) = repository.loadByProductOwnerId(id)
-
-    fun update(remindInfo: RemindInfo){
-        repository.updateRemindInfo(remindInfo)
-    }
+    fun load(productId: Int) = repository.load(productId)
 }

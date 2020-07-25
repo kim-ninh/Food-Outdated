@@ -39,7 +39,7 @@
         tools:layout="@layout/fragment_edit_product">
         <argument
             android:name="productId"
-            app:argType="long"
-            android:defaultValue="-1L" />
+            app:argType="integer"
+            android:defaultValue="-1" />
     </fragment>
 </navigation>

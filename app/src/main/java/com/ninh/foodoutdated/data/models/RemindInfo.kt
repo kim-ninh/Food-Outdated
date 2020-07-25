@@ -7,10 +7,11 @@ import java.util.*
 
 @Entity(tableName = "remind_info")
 data class RemindInfo(
-    @PrimaryKey(autoGenerate = true) val requestCode: Int = 0,
     var triggerDate: Calendar = Calendar.getInstance(),
     var repeating: RepeatingType = RepeatingType.NO_REPEAT,
-    var productOwnerId: Long? = null,
-    var isValid: Boolean = true
+    var isValid: Boolean = true,
+    @PrimaryKey var productId: Int = 0
 ) {
+    val requestCode: Int
+        get() = productId
 }

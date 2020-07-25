@@ -17,7 +17,7 @@ import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.databinding.ProductItemBinding
 
 class ProductAdapter(
-    private val onItemClickListener: ((Long) -> Unit)? = null
+    private val onItemClickListener: ((Int) -> Unit)? = null
 ) : ListAdapter<Product, ProductAdapter.ProductViewHolder>(
     PRODUCT_DIFF_CALLBACK
 ) {
@@ -34,13 +34,13 @@ class ProductAdapter(
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
         val product = getItem(position)
-        holder.bind(product, tracker.isSelected(product.id), onItemClickListener)
+        holder.bind(product, tracker.isSelected(product.id.toLong()), onItemClickListener)
     }
 
-    fun getItemKey(position: Int): Long = getItem(position).id!!
+    fun getItemKey(position: Int): Long = getItem(position).id.toLong()
 
     fun getPosition(key: Long): Int {
-        var position = currentList.indexOfFirst { it.id == key }
+        var position = currentList.indexOfFirst { it.id.toLong() == key }
         if (position == -1) {
             position = RecyclerView.NO_POSITION
         }
@@ -55,13 +55,13 @@ class ProductAdapter(
         private val RED_COLOR by lazy { ContextCompat.getColor(itemView.context, R.color.red) }
         private val YELLOW_COLOR by lazy { ContextCompat.getColor(itemView.context, R.color.yellow) }
 
-        fun bind(product: Product, isActive: Boolean, onItemClickListener: ((Long) -> Unit)?) {
+        fun bind(product: Product, isActive: Boolean, onItemClickListener: ((Int) -> Unit)?) {
             with(binding) {
                 itemView.isActivated = isActive
                 name.text = product.name
                 expiry.text = DateFormat.format(
                     itemView.resources.getString(R.string.date_pattern_vn),
-                    product.expiryDate
+                    product.expiry
                 )
                 when (product.state) {
                     ExpiryState.NEW -> expiry.setTextColor(GREEN_COLOR)
@@ -70,13 +70,13 @@ class ProductAdapter(
                 }
 
                 Glide.with(thumbnail)
-                    .load(product.file)
+                    .load(product.thumb)
                     .fallback(R.drawable.ic_waste)
                     .into(thumbnail)
 
                 onItemClickListener?.let { listener ->
                     itemView.setOnClickListener {
-                        listener.invoke(product.id!!)
+                        listener.invoke(product.id)
                     }
                 }
             }

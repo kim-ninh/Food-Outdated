@@ -7,7 +7,7 @@ data class ProductAndRemindInfo(
     @Embedded val product: Product,
     @Relation(
         parentColumn = "id",
-        entityColumn = "productOwnerId"
+        entityColumn = "productId"
     )
     val remindInfo: RemindInfo
 )
