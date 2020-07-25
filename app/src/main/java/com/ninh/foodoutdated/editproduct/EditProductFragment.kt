@@ -36,6 +36,7 @@ import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.databinding.FragmentEditProductBinding
 import com.ninh.foodoutdated.extensions.hideSoftKeyboard
 import com.ninh.foodoutdated.extensions.hideTitle
+import com.ninh.foodoutdated.newproduct.AddProductFragment
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
 import java.io.File
@@ -265,6 +266,11 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putParcelable(KEY_PHOTO_URI, photoUri)
+    }
+
+    override fun onDestroy() {
+        Logger.i("This fragment is AddProductFragment: ${this is AddProductFragment}")
+        super.onDestroy()
     }
 
     protected fun loadProductImage(file: File?) {

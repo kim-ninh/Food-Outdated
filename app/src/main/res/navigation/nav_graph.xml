@@ -32,22 +32,11 @@
     <fragment
         android:id="@+id/addProductFragment"
         android:name="com.ninh.foodoutdated.newproduct.AddProductFragment"
-        tools:layout="@layout/fragment_edit_product">
-        <action
-            android:id="@+id/action_addProductFragment_to_productsFragment"
-            app:destination="@id/productsFragment"
-            app:popUpTo="@id/productsFragment"
-            app:popUpToInclusive="true" />
-    </fragment>
+        tools:layout="@layout/fragment_edit_product"/>
     <fragment
         android:id="@+id/editProductFragment"
         android:name="com.ninh.foodoutdated.editproduct.EditProductFragment"
         tools:layout="@layout/fragment_edit_product">
-        <action
-            android:id="@+id/action_editProductFragment_to_productsFragment"
-            app:destination="@id/productsFragment"
-            app:popUpTo="@id/productsFragment"
-            app:popUpToInclusive="true" />
         <argument
             android:name="productId"
             app:argType="long"

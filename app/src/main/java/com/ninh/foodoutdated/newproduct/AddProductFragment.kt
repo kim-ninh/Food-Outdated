@@ -33,14 +33,14 @@ class AddProductFragment : EditProductFragment() {
                             "product inserted, id: ${it.first} remind info request code: ${it.second}"
                         )
 
-                        val action =
-                            AddProductFragmentDirections.actionAddProductFragmentToProductsFragment()
-                        findNavController().navigate(action)
+                        findNavController()
+                            .previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(KEY_IS_ADD_SUCCESSFUL, true)
+                        findNavController().navigateUp()
                     }
                 } else {
-                    val action =
-                        AddProductFragmentDirections.actionAddProductFragmentToProductsFragment()
-                    findNavController().navigate(action)
+                    findNavController().navigateUp()
                 }
                 true
             }
@@ -61,5 +61,7 @@ class AddProductFragment : EditProductFragment() {
 
     companion object {
         val TAG = AddProductFragment::class.java.simpleName
+
+        const val KEY_IS_ADD_SUCCESSFUL = "IS_ADD_SUCCESSFUL"
     }
 }

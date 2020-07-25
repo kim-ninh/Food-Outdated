@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.databinding.FragmentProductsBinding
+import com.ninh.foodoutdated.newproduct.AddProductFragment
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
 
@@ -143,6 +144,21 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 //        val navController = findNavController()
 //        val appBarConfiguration = AppBarConfiguration(navController.graph)
 //        (requireActivity() as AppCompatActivity).setupActionBarWithNavController(navController, appBarConfiguration)
+
+        val savedStateHandle = findNavController().currentBackStackEntry
+            ?.savedStateHandle
+
+        savedStateHandle?.getLiveData<Boolean>(AddProductFragment.KEY_IS_ADD_SUCCESSFUL)
+            ?.observe(viewLifecycleOwner){
+                if (it == false){
+                    return@observe
+                }
+
+                Snackbar.make(binding.root, "Product added successful.", Snackbar.LENGTH_LONG)
+                    .show()
+
+                savedStateHandle.remove<Boolean>(AddProductFragment.KEY_IS_ADD_SUCCESSFUL)
+            }
     }
 
     override fun onDestroyView() {

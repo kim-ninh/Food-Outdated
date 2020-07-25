@@ -39,6 +39,30 @@ abstract class ProductDao {
         return Pair(productId, requestCode)
     }
 
+    fun updateProductWithRemindInfo(productAndRemindInfo: ProductAndRemindInfo){
+        updateProduct(productAndRemindInfo.product)
+        updateRemindInfo(productAndRemindInfo.remindInfo)
+    }
+
+    fun deleteProductWithRemindInfo(productAndRemindInfo: ProductAndRemindInfo){
+        deleteProductById(productAndRemindInfo.product.id!!)
+        deleteRemindInfoByRequestCode(productAndRemindInfo.remindInfo.requestCode)
+    }
+
+    fun deleteProductWithRemindInfoByIds(ids: LongArray){
+        deleteProductsById(ids)
+        deleteRemindInfoByProductOwnerIds(ids)
+    }
+
     @Insert
     abstract fun insertRemindInfo(remindInfo: RemindInfo): Long
+
+    @Update
+    abstract fun updateRemindInfo(remindInfo: RemindInfo)
+
+    @Query("UPDATE remind_info SET isValid = 0 WHERE requestCode = :code")
+    abstract fun deleteRemindInfoByRequestCode(code: Int)
+
+    @Query("UPDATE remind_info SET isValid = 0 WHERE productOwnerId IN (:ids)")
+    abstract fun deleteRemindInfoByProductOwnerIds(ids: LongArray)
 }

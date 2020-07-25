@@ -24,13 +24,6 @@ class ProductRepo(
         get() = _newProductIdAndRemindInfoCode
     val allProducts: LiveData<List<Product>> = productDao.loadAllProducts()
 
-    fun insertProduct(product: Product) {
-        executor.submit {
-            val id = productDao.insertProduct(product)
-            _newProductIdObservable.postValue(id)
-        }
-    }
-
     fun insert(productAndRemindInfo: ProductAndRemindInfo): LiveData<Pair<Long, Int>>{
         val pairObservable = MutableLiveData<Pair<Long, Int>>()
         executor.submit {
@@ -41,9 +34,9 @@ class ProductRepo(
         return pairObservable
     }
 
-    fun updateProduct(product: Product) {
+    fun updateProduct(productAndRemindInfo: ProductAndRemindInfo){
         executor.submit {
-            productDao.updateProduct(product)
+            productDao.updateProductWithRemindInfo(productAndRemindInfo)
         }
     }
 

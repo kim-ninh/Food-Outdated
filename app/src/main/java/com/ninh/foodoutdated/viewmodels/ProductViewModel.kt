@@ -31,13 +31,12 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
         productIdAndRemindInfoCode = productRepo.newProductIdAndRemindInfoCode
     }
 
-    fun insert(product: Product) {
-        productRepo.insertProduct(product)
-    }
-
     fun insert(productAndRemindInfo: ProductAndRemindInfo) =
         productRepo.insert(productAndRemindInfo)
 
+    fun update(productAndRemindInfo: ProductAndRemindInfo){
+        productRepo.updateProduct(productAndRemindInfo)
+    }
 
     fun deleteByIds(productIds: LongArray) {
         productRepo.deleteProductsByIds(productIds)
