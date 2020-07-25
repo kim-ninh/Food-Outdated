@@ -33,12 +33,11 @@
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:alpha="0.1"
                 android:clickable="true"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ic_waste" />
+                tools:alpha="0.1"
+                tools:src="@drawable/ic_waste" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/name"

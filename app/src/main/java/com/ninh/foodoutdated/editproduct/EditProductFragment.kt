@@ -69,6 +69,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         drawable
     }
 
+    protected var tempFile: File? = null
     protected var photoUri: Uri? = null
     protected var photoFile: File? = null
         set(value) {
@@ -250,7 +251,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         }
 
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
-            val fullSizePhotoFile: File? = this.photoFile
+            val fullSizePhotoFile: File? = this.tempFile
             val resizedPhotoFile = createImageFile()
 
             val photoUri = this.photoUri!!
@@ -266,7 +267,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         outState.putParcelable(KEY_PHOTO_URI, photoUri)
     }
 
-    private fun loadProductImage(file: File?) {
+    protected fun loadProductImage(file: File?) {
         Glide.with(this)
             .load(file)
             .fallback(placeholderThumbnail)
@@ -331,7 +332,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             )
             it.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
             startActivityForResult(it, REQUEST_TAKE_PHOTO)
-            this.photoFile = photoFile
+            tempFile = photoFile
         }
     }
 

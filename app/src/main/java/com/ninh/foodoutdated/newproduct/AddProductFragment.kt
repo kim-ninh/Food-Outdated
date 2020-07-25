@@ -14,7 +14,9 @@ class AddProductFragment : EditProductFragment() {
         binding.toolbar.inflateMenu(R.menu.add_product)
     }
 
-    override fun loadProductFromDB() = Unit
+    override fun loadProductFromDB() {
+        loadProductImage(null)
+    }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
         return when (item.itemId) {
