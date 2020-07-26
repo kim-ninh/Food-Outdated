@@ -39,13 +39,13 @@ class ProductRepo(
 
     fun delete(productId: Int) {
         executor.submit {
-            productDao._deleteProduct(productId)
+            productDao.delete(productId)
         }
     }
 
     fun delete(productIds: IntArray) {
         executor.submit {
-            val numOfRowAffected = productDao._deleteProducts(productIds)
+            val numOfRowAffected = productDao.delete(productIds)
             _totalRowDeletedObserver.postValue(numOfRowAffected)
         }
     }

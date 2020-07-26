@@ -30,9 +30,11 @@ import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.MyApplication
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.Product
+import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
 import com.ninh.foodoutdated.databinding.FragmentEditProductBinding
 import com.ninh.foodoutdated.extensions.hideSoftKeyboard
 import com.ninh.foodoutdated.extensions.hideTitle
@@ -78,6 +80,8 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             loadProductImage(value)
         }
     protected var productNameChangeConfirmed = false
+    protected var loadedProduct: ProductAndRemindInfo? = null
+    protected var currentProduct: ProductAndRemindInfo? = null
 
     protected val quantityArr = generateSequence(1) { it + 1 }
         .map { it.toString(10) }
@@ -132,6 +136,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                     expiryDate = it.product.expiry
                     remindInfo = it.remindInfo
                 }
+                loadedProduct = it
             }
     }
 
@@ -190,6 +195,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     }
 
     override fun onDestroyView() {
+        currentProduct = ProductAndRemindInfo(product, binding.content.reminder.remindInfo)
         super.onDestroyView()
         _binding = null
     }
@@ -269,7 +275,16 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     }
 
     override fun onDestroy() {
-        Logger.i("This fragment is AddProductFragment: ${this is AddProductFragment}")
+        if (this is AddProductFragment){
+            super.onDestroy()
+            return
+        }
+
+        val product = currentProduct
+        if (product != null && loadedProduct != product){
+            AlarmUtils.update(requireContext(), product.remindInfo)
+            productViewModel.update(product)
+        }
         super.onDestroy()
     }
 

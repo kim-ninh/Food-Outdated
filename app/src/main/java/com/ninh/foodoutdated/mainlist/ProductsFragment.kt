@@ -16,6 +16,7 @@ import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.databinding.FragmentProductsBinding
 import com.ninh.foodoutdated.newproduct.AddProductFragment
@@ -46,6 +47,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
                     while (it.hasNext()) {
                         selectedIds[i++] = it.next().toInt()
                     }
+                    AlarmUtils.delete(requireContext(), selectedIds)
                     productViewModel.delete(selectedIds)
                     true
                 }

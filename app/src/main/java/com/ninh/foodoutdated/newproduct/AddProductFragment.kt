@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
+import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
 import com.ninh.foodoutdated.editproduct.EditProductFragment
@@ -32,7 +33,9 @@ class AddProductFragment : EditProductFragment() {
                             TAG,
                             "product inserted, id: $newId"
                         )
-
+                        val remindInfo = binding.content.reminder.remindInfo
+                        remindInfo.productId = newId
+                        AlarmUtils.add(requireContext(), remindInfo)
                         findNavController()
                             .previousBackStackEntry
                             ?.savedStateHandle
