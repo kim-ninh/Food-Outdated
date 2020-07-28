@@ -23,7 +23,7 @@ class ReminderPickerFragment : DialogFragment(),
 
     val expiry: Calendar = Calendar.getInstance()
 
-    private var triggerDateItem = getString(R.string.default_trigger_date)
+    private var triggerDateItem = ""
     private val _triggerDate: Calendar = Calendar.getInstance()
     private val triggerDate: Calendar
         get() = stringResToTriggerDate(triggerDateItem, expiry)
@@ -32,7 +32,7 @@ class ReminderPickerFragment : DialogFragment(),
     var triggerTime: Calendar? = Calendar.getInstance()
 
 
-    private var repeatTypeItem = getString(R.string.default_repeat_type)
+    private var repeatTypeItem = ""
     private val repeatingType: RepeatingType
         get() = stringResToRepeatType[repeatTypeItem] ?: error("Repeat type item not valid")
 
@@ -42,6 +42,8 @@ class ReminderPickerFragment : DialogFragment(),
         val inflater = requireActivity().layoutInflater
         binding = ReminderPickerLayoutBinding.inflate(inflater)
 
+        triggerDateItem = getString(R.string.default_trigger_date)
+        repeatTypeItem = getString(R.string.daily)
         val argsExpiry: Calendar = args.expiry
         val argsTriggerDate: Calendar? = args.triggerDate
         val argsTriggerTime: Calendar? = args.triggerTime
@@ -102,24 +104,28 @@ class ReminderPickerFragment : DialogFragment(),
         }
     }
 
-    private val repeatTypeToStringRes = mapOf(
-        RepeatingType.NO_REPEAT to getString(R.string.does_not_repeat),
-        RepeatingType.DAILY to getString(R.string.daily),
-        RepeatingType.WEEKLY to getString(R.string.weekly),
-        RepeatingType.MONTHLY to getString(R.string.monthly)
-    )
+    private val repeatTypeToStringRes by lazy {
+        mapOf(
+            RepeatingType.NO_REPEAT to getString(R.string.does_not_repeat),
+            RepeatingType.DAILY to getString(R.string.daily),
+            RepeatingType.WEEKLY to getString(R.string.weekly),
+            RepeatingType.MONTHLY to getString(R.string.monthly)
+        )
+    }
 
-    private val stringResToRepeatType = mapOf(
-        getString(R.string.does_not_repeat) to RepeatingType.NO_REPEAT,
-        getString(R.string.daily) to RepeatingType.DAILY,
-        getString(R.string.weekly) to RepeatingType.WEEKLY,
-        getString(R.string.monthly) to RepeatingType.MONTHLY
-    )
+    private val stringResToRepeatType by lazy {
+        mapOf(
+            getString(R.string.does_not_repeat) to RepeatingType.NO_REPEAT,
+            getString(R.string.daily) to RepeatingType.DAILY,
+            getString(R.string.weekly) to RepeatingType.WEEKLY,
+            getString(R.string.monthly) to RepeatingType.MONTHLY
+        )
+    }
 
     private fun stringResToTriggerDate(durationBeforeExpiry: String, expiry: Calendar) =
         _triggerDate.apply {
             timeInMillis = expiry.timeInMillis
-            when(durationBeforeExpiry){
+            when (durationBeforeExpiry) {
                 getString(R.string.a_week) -> add(Calendar.DAY_OF_MONTH, -7)
                 getString(R.string.fifteen_date) -> add(Calendar.DAY_OF_MONTH, -15)
                 getString(R.string.a_month) -> add(Calendar.MONTH, -1)

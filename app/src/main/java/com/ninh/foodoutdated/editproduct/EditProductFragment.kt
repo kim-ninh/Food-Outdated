@@ -47,6 +47,7 @@ import com.ninh.foodoutdated.dialogfragments.ReminderPickerFragment
 import com.ninh.foodoutdated.extensions.*
 import com.ninh.foodoutdated.newproduct.AddProductFragment
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
+import com.ninh.foodoutdated.viewmodels.ProductsViewModel
 import com.orhanobut.logger.Logger
 import java.io.File
 import java.io.FileOutputStream
@@ -64,7 +65,11 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     protected val binding
         get() = _binding!!
 
-    protected val productViewModel: ProductViewModel by viewModels {
+    protected val productsViewModel: ProductsViewModel by viewModels {
+        ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
+    }
+
+    protected val productViewModel: ProductViewModel by viewModels{
         ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
     }
 
@@ -82,18 +87,11 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     protected var tempFile: File? = null
     protected var photoUri: Uri? = null
     protected var photoFile: File? = null
-        set(value) {
-            field = value
-            loadedProduct.product.thumb = value
-            loadProductImage(value)
-        }
     protected var productNameChangeConfirmed = false
 
     protected var _loadedProduct = ProductAndRemindInfo(Product(), RemindInfo())
     protected val loadedProduct
         get() = _loadedProduct
-
-    protected var lastSavedProduct: ProductAndRemindInfo = ProductAndRemindInfo(Product(), RemindInfo())
 
     private var actionMode: ActionMode? = null
 
@@ -135,11 +133,10 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     open fun loadProductFromDB() {
         Log.i(TAG, "onViewCreated: received product id: ${args.productId}")
 
-        productViewModel.load(args.productId)
+        productsViewModel.load(args.productId)
             .observe(viewLifecycleOwner) {
-                _loadedProduct = it
-                lastSavedProduct = it.copy()
-                updateUIs(loadedProduct)
+                _loadedProduct = it.copy()
+                productViewModel.setProduct(it)
             }
     }
 
@@ -178,18 +175,6 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     protected open fun getThisBackStackEntry(navController: NavController) =
         navController.getBackStackEntry(R.id.editProductFragment)
 
-    protected fun updateUIs(product: ProductAndRemindInfo) = with(binding) {
-        if (product.product.name.isNotEmpty()){
-            collapsingToolbarLayout.title = product.product.name
-            name.setText(product.product.name)
-        }
-        content.quantity.text = product.product.quantity.toString()
-        content.expiry.text = DateFormat.format(getString(R.string.date_pattern_vn), product.product.expiry)
-        content.reminder.text = DateFormat.format(getString(R.string.reminder_date_pattern), product.remindInfo.triggerDate)
-
-        loadProductImage(product.product.thumb)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentEditProductBinding.bind(view)
@@ -207,24 +192,24 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             inflateToolbarMenu()
 
             thumbnail.setOnClickListener {
-                val action = getActionToProductThumbActionFragment(loadedProduct.product.thumb?.absolutePath)
+                val action = getActionToProductThumbActionFragment(productViewModel.thumb.value?.absolutePath)
                 navController.navigate(action)
             }
 
             content.quantity.setOnClickListener {
-                val action = getActionToNumberPickerFragment(1, 10, loadedProduct.product.quantity)
+                val action = getActionToNumberPickerFragment(1, 10, productViewModel.quantity.value!!)
                 navController.navigate(action)
             }
 
             content.expiry.setOnClickListener {
-                val action = getActionToDatePickerFragment(loadedProduct.product.expiry)
+                val action = getActionToDatePickerFragment(productViewModel.expiry.value!!)
                 navController.navigate(action)
             }
 
             content.reminder.setOnClickListener {
-                val expiry =  loadedProduct.product.expiry
-                val triggerDate = loadedProduct.remindInfo.triggerDate
-                val repeatingType = loadedProduct.remindInfo.repeating
+                val expiry =  productViewModel.expiry.value!!
+                val triggerDate = productViewModel.reminder.value
+                val repeatingType = productViewModel.productAndRemindInfo.value!!.remindInfo.repeating
 
                 val action = getActionToReminderPickerFragment(expiry, triggerDate, triggerDate, repeatingType)
                 navController.navigate(action)
@@ -246,6 +231,35 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                 .forEach { focusableView ->
                     focusableView.onFocusChangeListener = this@EditProductFragment
                 }
+
+            productViewModel.name.observe(viewLifecycleOwner){
+                if (it.isNotEmpty() && it.isNotBlank()){
+                    collapsingToolbarLayout.title = it
+                    name.setText(it)
+                }else{
+                    collapsingToolbarLayout.title = "Untitled"
+                    name.setText("")
+                }
+                name.alpha = 0f
+            }
+
+            productViewModel.quantity.observe(viewLifecycleOwner){
+                content.quantity.text = it.toString()
+            }
+
+            productViewModel.expiry.observe(viewLifecycleOwner){
+                content.expiry.text = DateFormat.format(getString(R.string.date_pattern_vn), it)
+            }
+
+            productViewModel.thumb.observe(viewLifecycleOwner){
+                loadProductImage(it)
+            }
+
+            productViewModel.reminder.observe(viewLifecycleOwner){
+                content.reminder.text = DateFormat.format(getString(R.string.reminder_date_pattern), it)
+            }
+
+            Unit
         }
 
         val navBackStackEntry = getThisBackStackEntry(navController)
@@ -255,8 +269,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                 with(navBackStackEntry.savedStateHandle) {
                     if (contains(DatePickerFragment.KEY_PICKED_DATE)) {
                         val pickedDate = pop<Calendar>(DatePickerFragment.KEY_PICKED_DATE)!!
-                        loadedProduct.product.expiry.timeInMillis = pickedDate.timeInMillis
-                        binding.content.expiry.text = DateFormat.format(getString(R.string.date_pattern_vn), loadedProduct.product.expiry)
+                        productViewModel.setExpiry(pickedDate)
                     }
 
                     if (contains(ProductThumbActionFragment.KEY_THUMB_ACTION_INDEX)) {
@@ -273,15 +286,12 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
                     if (contains(NumberPickerFragment.KEY_SELECTED_VALUE)){
                         val quantity = pop<Int>(NumberPickerFragment.KEY_SELECTED_VALUE)!!
-                        loadedProduct.product.quantity = quantity
-                        binding.content.quantity.text = loadedProduct.product.quantity.toString()
+                        productViewModel.setQuantity(quantity)
                     }
 
                     if (contains(ReminderPickerFragment.KEY_REMIND_INFO)){
                         val remindInfo = pop<RemindInfo>(ReminderPickerFragment.KEY_REMIND_INFO)!!
-                        loadedProduct.remindInfo.triggerDate = remindInfo.triggerDate
-                        loadedProduct.remindInfo.repeating = remindInfo.repeating
-                        binding.content.reminder.text = DateFormat.format(getString(R.string.reminder_date_pattern), loadedProduct.remindInfo.triggerDate)
+                        productViewModel.setReminder(remindInfo)
                     }
                 }
             }
@@ -323,14 +333,12 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                     Snackbar.make(binding.root, "Updated name", Snackbar.LENGTH_LONG)
                         .setAction("Undo") {
                             Logger.i("Undo text to ${name.tag}.")
-                            name.setText(name.tag.toString())
-                            collapsingToolbarLayout.title = name.text.toString()
+                            productViewModel.setName(name.tag.toString())
                         }
                         .show()
                 }
                 name.hideSoftKeyboard()
-                updateEditTextAndToolBar()
-                loadedProduct.product.name = name.text.toString()
+                productViewModel.setName(name.text.toString())
             }
         }
 
@@ -358,6 +366,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
             decodeBitmapAndSave(imageUri, photoFile) {
                 this.photoFile = photoFile
+                productViewModel.setThumb(photoFile)
             }
         }
 
@@ -369,6 +378,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             decodeBitmapAndSave(photoUri, resizedPhotoFile) {
                 fullSizePhotoFile?.delete()
                 this.photoFile = resizedPhotoFile
+                productViewModel.setThumb(resizedPhotoFile)
             }
         }
     }
@@ -384,9 +394,9 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             return
         }
 
-        if (lastSavedProduct != loadedProduct){
-            AlarmUtils.update(requireContext(), loadedProduct.remindInfo)
-            productViewModel.update(loadedProduct)
+        if (productViewModel.productAndRemindInfo.value != loadedProduct){
+            AlarmUtils.update(requireContext(), productViewModel.productAndRemindInfo.value!!.remindInfo)
+            productsViewModel.update(productViewModel.productAndRemindInfo.value!!)
         }
         super.onDestroy()
     }
@@ -431,6 +441,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     private fun removePhotoFile() {
         photoFile?.delete()
         photoFile = null
+        productViewModel.setThumb(photoFile)
     }
 
     private fun dispatchTakePictureIntent() {
@@ -460,15 +471,6 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         if (intent.resolveActivity(requireActivity().packageManager) != null) {
             startActivityForResult(intent, REQUEST_IMAGE_GET)
         }
-    }
-
-    private fun updateEditTextAndToolBar() = with(binding) {
-        if (name.text!!.isNotEmpty() && name.text!!.isNotBlank()) {
-            collapsingToolbarLayout.title = name.text
-        } else {
-            collapsingToolbarLayout.title = name.tag.toString()
-        }
-        name.alpha = 0f
     }
 
     companion object {

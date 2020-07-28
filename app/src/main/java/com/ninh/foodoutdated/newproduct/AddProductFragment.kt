@@ -18,7 +18,7 @@ class AddProductFragment : EditProductFragment() {
     }
 
     override fun loadProductFromDB() {
-        updateUIs(loadedProduct)
+        productViewModel.loadDefaultProduct()
     }
 
     override fun getActionToDatePickerFragment(pickingDate: Calendar) =
@@ -41,7 +41,12 @@ class AddProductFragment : EditProductFragment() {
         triggerTime: Calendar?,
         repeatingType: RepeatingType
     ) =
-        AddProductFragmentDirections.actionAddProductFragmentToReminderPickerFragment(expiry)
+        AddProductFragmentDirections.actionAddProductFragmentToReminderPickerFragment(
+            expiry,
+            triggerDate,
+            triggerTime,
+            repeatingType
+        )
 
     override fun getActionToProductThumbActionFragment(photoFilePath: String?) =
         AddProductFragmentDirections.actionAddProductFragmentToProductThumbActionFragment(
@@ -55,22 +60,23 @@ class AddProductFragment : EditProductFragment() {
         return when (item.itemId) {
             R.id.item_add -> {
                 if (validate()) {
-                    productViewModel
-                        .insert(loadedProduct)
+                    productsViewModel
+                        .insert(productViewModel.productAndRemindInfo.value!!)
                         .observe(this) { newId ->
-                        Log.i(
-                            TAG,
-                            "product inserted, id: $newId"
-                        )
-                        val remindInfo = loadedProduct.remindInfo
-                        remindInfo.productId = newId
-                        AlarmUtils.add(requireContext(), remindInfo)
-                        findNavController()
-                            .previousBackStackEntry
-                            ?.savedStateHandle
-                            ?.set(KEY_IS_ADD_SUCCESSFUL, true)
-                        findNavController().navigateUp()
-                    }
+                            Log.i(
+                                TAG,
+                                "product inserted, id: $newId"
+                            )
+                            val remindInfo =
+                                productViewModel.productAndRemindInfo.value!!.remindInfo
+                            remindInfo.productId = newId
+                            AlarmUtils.add(requireContext(), remindInfo)
+                            findNavController()
+                                .previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(KEY_IS_ADD_SUCCESSFUL, true)
+                            findNavController().navigateUp()
+                        }
                 } else {
                     findNavController().navigateUp()
                 }

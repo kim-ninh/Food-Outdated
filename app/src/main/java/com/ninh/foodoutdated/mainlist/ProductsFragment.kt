@@ -20,12 +20,12 @@ import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.databinding.FragmentProductsBinding
 import com.ninh.foodoutdated.newproduct.AddProductFragment
-import com.ninh.foodoutdated.viewmodels.ProductViewModel
+import com.ninh.foodoutdated.viewmodels.ProductsViewModel
 import com.orhanobut.logger.Logger
 
 class ProductsFragment : Fragment(R.layout.fragment_products) {
 
-    private val productViewModel: ProductViewModel by viewModels {
+    private val productsViewModel: ProductsViewModel by viewModels {
         ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
     }
     private lateinit var selectionTracker: SelectionTracker<Long>
@@ -48,7 +48,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
                         selectedIds[i++] = it.next().toInt()
                     }
                     AlarmUtils.delete(requireContext(), selectedIds)
-                    productViewModel.delete(selectedIds)
+                    productsViewModel.delete(selectedIds)
                     true
                 }
                 else -> false
@@ -123,7 +123,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
         productAdapter.tracker = selectionTracker
 
-        productViewModel.run {
+        productsViewModel.run {
             allProducts.observe(
                 viewLifecycleOwner
             ) { products ->
