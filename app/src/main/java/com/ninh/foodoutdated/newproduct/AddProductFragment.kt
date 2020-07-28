@@ -3,11 +3,13 @@ package com.ninh.foodoutdated.newproduct
 import android.util.Log
 import android.view.MenuItem
 import androidx.lifecycle.observe
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.R
-import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
+import com.ninh.foodoutdated.data.models.RepeatingType
 import com.ninh.foodoutdated.editproduct.EditProductFragment
+import java.util.*
 
 class AddProductFragment : EditProductFragment() {
 
@@ -16,24 +18,51 @@ class AddProductFragment : EditProductFragment() {
     }
 
     override fun loadProductFromDB() {
-        loadProductImage(null)
+        updateUIs(loadedProduct)
     }
+
+    override fun getActionToDatePickerFragment(pickingDate: Calendar) =
+        AddProductFragmentDirections.actionAddProductFragmentToDatePickerFragment(pickingDate)
+
+    override fun getActionToNumberPickerFragment(
+        startValue: Int,
+        endValue: Int,
+        selectedValue: Int
+    ) =
+        AddProductFragmentDirections.actionAddProductFragmentToNumberPickerFragment(
+            startValue,
+            endValue,
+            selectedValue
+        )
+
+    override fun getActionToReminderPickerFragment(
+        expiry: Calendar,
+        triggerDate: Calendar?,
+        triggerTime: Calendar?,
+        repeatingType: RepeatingType
+    ) =
+        AddProductFragmentDirections.actionAddProductFragmentToReminderPickerFragment(expiry)
+
+    override fun getActionToProductThumbActionFragment(photoFilePath: String?) =
+        AddProductFragmentDirections.actionAddProductFragmentToProductThumbActionFragment(
+            photoFilePath
+        )
+
+    override fun getThisBackStackEntry(navController: NavController) =
+        navController.getBackStackEntry(R.id.addProductFragment)
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.item_add -> {
                 if (validate()) {
-                    productViewModel.insert(
-                        ProductAndRemindInfo(
-                            product,
-                            binding.content.reminder.remindInfo
-                        )
-                    ).observe(this) {newId ->
+                    productViewModel
+                        .insert(loadedProduct)
+                        .observe(this) { newId ->
                         Log.i(
                             TAG,
                             "product inserted, id: $newId"
                         )
-                        val remindInfo = binding.content.reminder.remindInfo
+                        val remindInfo = loadedProduct.remindInfo
                         remindInfo.productId = newId
                         AlarmUtils.add(requireContext(), remindInfo)
                         findNavController()

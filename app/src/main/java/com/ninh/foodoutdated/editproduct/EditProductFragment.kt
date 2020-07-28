@@ -21,23 +21,30 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.MyApplication
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
+import com.ninh.foodoutdated.data.models.RemindInfo
+import com.ninh.foodoutdated.data.models.RepeatingType
 import com.ninh.foodoutdated.databinding.FragmentEditProductBinding
-import com.ninh.foodoutdated.extensions.hideSoftKeyboard
-import com.ninh.foodoutdated.extensions.hideTitle
+import com.ninh.foodoutdated.dialogfragments.DatePickerFragment
+import com.ninh.foodoutdated.dialogfragments.NumberPickerFragment
+import com.ninh.foodoutdated.dialogfragments.ProductThumbActionFragment
+import com.ninh.foodoutdated.dialogfragments.ReminderPickerFragment
+import com.ninh.foodoutdated.extensions.*
 import com.ninh.foodoutdated.newproduct.AddProductFragment
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.orhanobut.logger.Logger
@@ -77,23 +84,22 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     protected var photoFile: File? = null
         set(value) {
             field = value
+            loadedProduct.product.thumb = value
             loadProductImage(value)
         }
     protected var productNameChangeConfirmed = false
-    protected var loadedProduct: ProductAndRemindInfo? = null
-    protected var currentProduct: ProductAndRemindInfo? = null
 
-    protected val quantityArr = generateSequence(1) { it + 1 }
-        .map { it.toString(10) }
-        .take(10)
-        .toList()
-        .toTypedArray()
+    protected var _loadedProduct = ProductAndRemindInfo(Product(), RemindInfo())
+    protected val loadedProduct
+        get() = _loadedProduct
+
+    protected var lastSavedProduct: ProductAndRemindInfo = ProductAndRemindInfo(Product(), RemindInfo())
 
     private var actionMode: ActionMode? = null
 
-    private var actionModeCallback: ActionMode.Callback = object : ActionMode.Callback{
+    private var actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            return when(item.itemId){
+            return when (item.itemId) {
                 R.id.confirm_button -> {
                     productNameChangeConfirmed = true
                     actionMode?.finish()
@@ -116,7 +122,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
         override fun onDestroyActionMode(mode: ActionMode) {
             actionMode = null
-            if (binding.name.isFocused){
+            if (binding.name.isFocused) {
                 binding.name.clearFocus()
             }
         }
@@ -131,24 +137,57 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
         productViewModel.load(args.productId)
             .observe(viewLifecycleOwner) {
-                updateUIs(it.product)
-                binding.content.reminder.apply {
-                    expiryDate = it.product.expiry
-                    remindInfo = it.remindInfo
-                }
-                loadedProduct = it
+                _loadedProduct = it
+                lastSavedProduct = it.copy()
+                updateUIs(loadedProduct)
             }
     }
 
-    protected fun updateUIs(product: Product) = with(binding) {
-        val quantityIndex = quantityArr.indexOf(product.quantity.toString())
+    protected open fun getActionToDatePickerFragment(pickingDate: Calendar) =
+        EditProductFragmentDirections.actionEditProductFragmentToDatePickerFragment(pickingDate)
 
-        collapsingToolbarLayout.title = product.name
-        name.setText(product.name)
-        content.quantity.currentValue = quantityIndex
-        content.expiry.datePicked = product.expiry
+    protected open fun getActionToNumberPickerFragment(
+        startValue: Int,
+        endValue: Int,
+        selectedValue: Int
+    ) =
+        EditProductFragmentDirections.actionEditProductFragmentToNumberPickerFragment(
+            startValue,
+            endValue,
+            selectedValue
+        )
 
-        loadProductImage(product.thumb)
+    protected open fun getActionToReminderPickerFragment(
+        expiry: Calendar,
+        triggerDate: Calendar?,
+        triggerTime: Calendar?,
+        repeatingType: RepeatingType
+    ) =
+        EditProductFragmentDirections.actionEditProductFragmentToReminderPickerFragment(
+            expiry,
+            triggerDate,
+            triggerTime,
+            repeatingType
+        )
+
+    protected open fun getActionToProductThumbActionFragment(photoFilePath: String?) =
+        EditProductFragmentDirections.actionEditProductFragmentToProductThumbActionFragment(
+            photoFilePath
+        )
+
+    protected open fun getThisBackStackEntry(navController: NavController) =
+        navController.getBackStackEntry(R.id.editProductFragment)
+
+    protected fun updateUIs(product: ProductAndRemindInfo) = with(binding) {
+        if (product.product.name.isNotEmpty()){
+            collapsingToolbarLayout.title = product.product.name
+            name.setText(product.product.name)
+        }
+        content.quantity.text = product.product.quantity.toString()
+        content.expiry.text = DateFormat.format(getString(R.string.date_pattern_vn), product.product.expiry)
+        content.reminder.text = DateFormat.format(getString(R.string.reminder_date_pattern), product.remindInfo.triggerDate)
+
+        loadProductImage(product.product.thumb)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -167,7 +206,30 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             toolbar.setOnMenuItemClickListener(this@EditProductFragment)
             inflateToolbarMenu()
 
-            thumbnail.setOnClickListener { showImageActionDialog() }
+            thumbnail.setOnClickListener {
+                val action = getActionToProductThumbActionFragment(loadedProduct.product.thumb?.absolutePath)
+                navController.navigate(action)
+            }
+
+            content.quantity.setOnClickListener {
+                val action = getActionToNumberPickerFragment(1, 10, loadedProduct.product.quantity)
+                navController.navigate(action)
+            }
+
+            content.expiry.setOnClickListener {
+                val action = getActionToDatePickerFragment(loadedProduct.product.expiry)
+                navController.navigate(action)
+            }
+
+            content.reminder.setOnClickListener {
+                val expiry =  loadedProduct.product.expiry
+                val triggerDate = loadedProduct.remindInfo.triggerDate
+                val repeatingType = loadedProduct.remindInfo.repeating
+
+                val action = getActionToReminderPickerFragment(expiry, triggerDate, triggerDate, repeatingType)
+                navController.navigate(action)
+            }
+
             name.setOnEditorActionListener { _, actionId, _ ->
                 return@setOnEditorActionListener when (actionId) {
                     EditorInfo.IME_ACTION_DONE -> {
@@ -184,18 +246,59 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                 .forEach { focusableView ->
                     focusableView.onFocusChangeListener = this@EditProductFragment
                 }
+        }
 
-            content.quantity.displayedValues = quantityArr
-            content.expiry.onDatePickChanged = { datePicked ->
-                content.reminder.expiryDate = datePicked
+        val navBackStackEntry = getThisBackStackEntry(navController)
+
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                with(navBackStackEntry.savedStateHandle) {
+                    if (contains(DatePickerFragment.KEY_PICKED_DATE)) {
+                        val pickedDate = pop<Calendar>(DatePickerFragment.KEY_PICKED_DATE)!!
+                        loadedProduct.product.expiry.timeInMillis = pickedDate.timeInMillis
+                        binding.content.expiry.text = DateFormat.format(getString(R.string.date_pattern_vn), loadedProduct.product.expiry)
+                    }
+
+                    if (contains(ProductThumbActionFragment.KEY_THUMB_ACTION_INDEX)) {
+                        val actionIndex =
+                            pop<Int>(ProductThumbActionFragment.KEY_THUMB_ACTION_INDEX)!!
+
+                        val productThumbActions = mutableListOf(
+                            this@EditProductFragment::dispatchTakePictureIntent,
+                            this@EditProductFragment::selectImage,
+                            this@EditProductFragment::removePhotoFile
+                        )
+                        productThumbActions[actionIndex].invoke()
+                    }
+
+                    if (contains(NumberPickerFragment.KEY_SELECTED_VALUE)){
+                        val quantity = pop<Int>(NumberPickerFragment.KEY_SELECTED_VALUE)!!
+                        loadedProduct.product.quantity = quantity
+                        binding.content.quantity.text = loadedProduct.product.quantity.toString()
+                    }
+
+                    if (contains(ReminderPickerFragment.KEY_REMIND_INFO)){
+                        val remindInfo = pop<RemindInfo>(ReminderPickerFragment.KEY_REMIND_INFO)!!
+                        loadedProduct.remindInfo.triggerDate = remindInfo.triggerDate
+                        loadedProduct.remindInfo.repeating = remindInfo.repeating
+                        binding.content.reminder.text = DateFormat.format(getString(R.string.reminder_date_pattern), loadedProduct.remindInfo.triggerDate)
+                    }
+                }
             }
         }
+
+        navBackStackEntry.lifecycle.addObserver(observer)
+
+        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
+                navBackStackEntry.lifecycle.removeObserver(observer)
+            }
+        })
 
         loadProductFromDB()
     }
 
     override fun onDestroyView() {
-        currentProduct = ProductAndRemindInfo(product, binding.content.reminder.remindInfo)
         super.onDestroyView()
         _binding = null
     }
@@ -208,7 +311,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                 collapsingToolbarLayout.hideTitle()
                 v.alpha = 1f
 
-                if (actionMode == null){
+                if (actionMode == null) {
                     actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(
                         actionModeCallback
                     )
@@ -227,6 +330,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                 }
                 name.hideSoftKeyboard()
                 updateEditTextAndToolBar()
+                loadedProduct.product.name = name.text.toString()
             }
         }
 
@@ -275,15 +379,14 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     }
 
     override fun onDestroy() {
-        if (this is AddProductFragment){
+        if (this is AddProductFragment) {
             super.onDestroy()
             return
         }
 
-        val product = currentProduct
-        if (product != null && loadedProduct != product){
-            AlarmUtils.update(requireContext(), product.remindInfo)
-            productViewModel.update(product)
+        if (lastSavedProduct != loadedProduct){
+            AlarmUtils.update(requireContext(), loadedProduct.remindInfo)
+            productViewModel.update(loadedProduct)
         }
         super.onDestroy()
     }
@@ -313,15 +416,6 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             requireActivity().runOnUiThread(uiCallback)
         }
     }
-
-    protected val product: Product
-        get() = with(binding) {
-            val productName = name.text.toString()
-            val quantity = quantityArr[content.quantity.currentValue].toInt()
-            val expiryDate = content.expiry.datePicked
-
-            Product(productName, quantity, expiryDate, photoFile)
-        }
 
     private fun createImageFile(): File {
         val timeStamp = DateFormat.format("yyyyMMdd_HHmmss", Calendar.getInstance())
@@ -375,38 +469,6 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             collapsingToolbarLayout.title = name.tag.toString()
         }
         name.alpha = 0f
-    }
-
-    private fun showImageActionDialog() {
-        val productImageActions = mutableListOf(
-            ProductImageAction(
-                "Take photo",
-                R.drawable.ic_camera_alt_black_24dp,
-                this::dispatchTakePictureIntent
-            ),
-            ProductImageAction(
-                "Pick from gallery", R.drawable.ic_photo_black_24dp, this::selectImage
-            )
-        ).apply {
-            if (photoFile != null) {
-                add(
-                    0, ProductImageAction(
-                        "Remove photo",
-                        R.drawable.ic_clear_black_24dp,
-                        this@EditProductFragment::removePhotoFile
-                    )
-                )
-            }
-        }
-
-        val simpleDialog = MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Modify Image")
-            .setAdapter(
-                ProductImageActionAdapter(productImageActions)
-            ) { _, which ->
-                productImageActions[which].action.invoke()
-            }
-        simpleDialog.show()
     }
 
     companion object {
