@@ -1,20 +1,16 @@
 package com.ninh.foodoutdated.viewmodels
 
-import android.app.Application
-import android.content.res.Resources
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.ninh.foodoutdated.R
+import androidx.lifecycle.ViewModel
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
 import com.ninh.foodoutdated.data.models.RemindInfo
+import com.ninh.foodoutdated.dialogfragments.TriggerDate
 import java.io.File
 import java.util.*
 
-class ProductViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val resources: Resources = application.resources
+class ProductViewModel: ViewModel() {
 
     private val _thumb = MutableLiveData<File?>()
     val thumb: LiveData<File?>
@@ -69,7 +65,9 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
 
         productAndRemindInfo.value?.apply {
             product.expiry = expiry
-            stringResToTriggerDate(resources.getString(R.string.default_trigger_date), expiry, remindInfo.triggerDate)
+
+            val defaultTriggerDateValue = TriggerDate.A_WEEK_BEFORE.getValueFromExpiry(expiry)
+            remindInfo.triggerDate.timeInMillis = defaultTriggerDateValue.timeInMillis
             _reminder.value = remindInfo.triggerDate
         }
     }
@@ -95,17 +93,5 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
     fun loadDefaultProduct(){
         val defaultProductAndRemindInfo = ProductAndRemindInfo(Product(), RemindInfo())
         setProduct(defaultProductAndRemindInfo)
-    }
-
-    private fun stringResToTriggerDate(durationBeforeExpiry: String, expiry: Calendar, triggerDate: Calendar){
-        triggerDate.apply {
-            timeInMillis = expiry.timeInMillis
-            when(durationBeforeExpiry){
-                resources.getString(R.string.a_week) -> add(Calendar.DAY_OF_MONTH, -7)
-                resources.getString(R.string.fifteen_date) -> add(Calendar.DAY_OF_MONTH, -15)
-                resources.getString(R.string.a_month) -> add(Calendar.MONTH, -1)
-                resources.getString(R.string.three_month) -> add(Calendar.MONTH, -3)
-            }
-        }
     }
 }

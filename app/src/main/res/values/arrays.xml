@@ -6,10 +6,10 @@
     </string-array>
 
     <string-array name="spinner_trigger_date">
-        <item>@string/a_week</item>
-        <item>@string/fifteen_date</item>
-        <item>@string/a_month</item>
-        <item>@string/three_month</item>
+        <item>@string/a_week_before</item>
+        <item>@string/fifteen_date_before</item>
+        <item>@string/a_month_before</item>
+        <item>@string/three_month_before</item>
     </string-array>
 
     <string-array name="spinner_repeating_type">

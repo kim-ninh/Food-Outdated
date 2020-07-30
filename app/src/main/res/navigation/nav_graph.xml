@@ -113,18 +113,14 @@
             app:argType="java.util.Calendar" />
         <argument
             android:name="triggerDate"
-            app:argType="java.util.Calendar"
-            app:nullable="true"
-            android:defaultValue="@null" />
-        <argument
-            android:name="triggerTime"
-            app:argType="java.util.Calendar"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:argType="java.util.Calendar" />
         <argument
             android:name="repeatType"
             app:argType="com.ninh.foodoutdated.data.models.RepeatingType"
             android:defaultValue="DAILY" />
+        <action
+            android:id="@+id/action_reminderPickerFragment_to_datePickerFragment"
+            app:destination="@id/datePickerFragment" />
     </dialog>
     <dialog
         android:id="@+id/productThumbActionFragment"

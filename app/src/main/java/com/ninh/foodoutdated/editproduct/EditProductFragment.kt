@@ -26,6 +26,8 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.navigation.NavController
+import androidx.navigation.NavDirections
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
@@ -45,7 +47,6 @@ import com.ninh.foodoutdated.dialogfragments.NumberPickerFragment
 import com.ninh.foodoutdated.dialogfragments.ProductThumbActionFragment
 import com.ninh.foodoutdated.dialogfragments.ReminderPickerFragment
 import com.ninh.foodoutdated.extensions.*
-import com.ninh.foodoutdated.newproduct.AddProductFragment
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.ninh.foodoutdated.viewmodels.ProductsViewModel
 import com.orhanobut.logger.Logger
@@ -55,9 +56,7 @@ import java.util.*
 
 open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     View.OnFocusChangeListener,
-    Toolbar.OnMenuItemClickListener {
-
-    private val TAG = EditProductFragment::class.java.simpleName
+    Toolbar.OnMenuItemClickListener{
 
     private val args: EditProductFragmentArgs by navArgs()
 
@@ -69,9 +68,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
     }
 
-    protected val productViewModel: ProductViewModel by viewModels{
-        ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
-    }
+    protected val productViewModel: ProductViewModel by viewModels()
 
     protected val executorService by lazy {
         (requireActivity().application as MyApplication)
@@ -140,37 +137,43 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             }
     }
 
-    protected open fun getActionToDatePickerFragment(pickingDate: Calendar) =
-        EditProductFragmentDirections.actionEditProductFragmentToDatePickerFragment(pickingDate)
+    protected open val actionToDatePickerFragmentFunc =
+        (EditProductFragmentDirections)::actionEditProductFragmentToDatePickerFragment
 
-    protected open fun getActionToNumberPickerFragment(
-        startValue: Int,
-        endValue: Int,
-        selectedValue: Int
-    ) =
-        EditProductFragmentDirections.actionEditProductFragmentToNumberPickerFragment(
-            startValue,
-            endValue,
-            selectedValue
-        )
+    private fun getActionToDatePickerFragment(productViewModel: ProductViewModel): NavDirections =
+        with(productViewModel){
+            actionToDatePickerFragmentFunc.invoke(expiry.value!!)
+        }
 
-    protected open fun getActionToReminderPickerFragment(
-        expiry: Calendar,
-        triggerDate: Calendar?,
-        triggerTime: Calendar?,
-        repeatingType: RepeatingType
-    ) =
-        EditProductFragmentDirections.actionEditProductFragmentToReminderPickerFragment(
-            expiry,
-            triggerDate,
-            triggerTime,
-            repeatingType
-        )
+    protected open val actionToNumberPickerFragmentFunc =
+        (EditProductFragmentDirections)::actionEditProductFragmentToNumberPickerFragment
 
-    protected open fun getActionToProductThumbActionFragment(photoFilePath: String?) =
-        EditProductFragmentDirections.actionEditProductFragmentToProductThumbActionFragment(
-            photoFilePath
-        )
+    private fun getActionToNumberPickerFragment(productViewModel: ProductViewModel): NavDirections =
+        with(productViewModel){
+            actionToNumberPickerFragmentFunc.invoke(1, 10, quantity.value!!)
+        }
+
+    protected open val actionToReminderPickerFragmentFunc =
+        (EditProductFragmentDirections)::actionEditProductFragmentToReminderPickerFragment
+
+    private fun getActionToReminderPickerFragment(productViewModel: ProductViewModel): NavDirections =
+        with(productViewModel){
+            val expiry = expiry.value!!
+            val triggerDate = reminder.value!!
+            val repeatingType = productAndRemindInfo.value!!.remindInfo.repeating
+
+            actionToReminderPickerFragmentFunc.invoke(expiry, triggerDate, repeatingType)
+        }
+
+    protected open val actionToProductThumbActionFragmentFunc =
+        (EditProductFragmentDirections)::actionEditProductFragmentToProductThumbActionFragment
+
+    private fun getActionToProductThumbActionFragment(productViewModel: ProductViewModel): NavDirections =
+        with(productViewModel) {
+            val filePath = thumb.value?.absolutePath
+            actionToProductThumbActionFragmentFunc.invoke(filePath)
+        }
+
 
     protected open fun getThisBackStackEntry(navController: NavController) =
         navController.getBackStackEntry(R.id.editProductFragment)
@@ -191,29 +194,20 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             toolbar.setOnMenuItemClickListener(this@EditProductFragment)
             inflateToolbarMenu()
 
-            thumbnail.setOnClickListener {
-                val action = getActionToProductThumbActionFragment(productViewModel.thumb.value?.absolutePath)
-                navController.navigate(action)
-            }
+            val actions = arrayOf(
+                this@EditProductFragment::getActionToProductThumbActionFragment,
+                this@EditProductFragment::getActionToNumberPickerFragment,
+                this@EditProductFragment::getActionToDatePickerFragment,
+                this@EditProductFragment::getActionToReminderPickerFragment
+            )
 
-            content.quantity.setOnClickListener {
-                val action = getActionToNumberPickerFragment(1, 10, productViewModel.quantity.value!!)
-                navController.navigate(action)
-            }
-
-            content.expiry.setOnClickListener {
-                val action = getActionToDatePickerFragment(productViewModel.expiry.value!!)
-                navController.navigate(action)
-            }
-
-            content.reminder.setOnClickListener {
-                val expiry =  productViewModel.expiry.value!!
-                val triggerDate = productViewModel.reminder.value
-                val repeatingType = productViewModel.productAndRemindInfo.value!!.remindInfo.repeating
-
-                val action = getActionToReminderPickerFragment(expiry, triggerDate, triggerDate, repeatingType)
-                navController.navigate(action)
-            }
+            arrayOf(thumbnail, content.quantity, content.expiry, content.reminder)
+                .forEachIndexed { index, view ->
+                    view.setOnClickListener {
+                        val action = actions[index].invoke(productViewModel)
+                        it.findNavController().navigate(action)
+                    }
+                }
 
             name.setOnEditorActionListener { _, actionId, _ ->
                 return@setOnEditorActionListener when (actionId) {
@@ -232,31 +226,32 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                     focusableView.onFocusChangeListener = this@EditProductFragment
                 }
 
-            productViewModel.name.observe(viewLifecycleOwner){
-                if (it.isNotEmpty() && it.isNotBlank()){
+            productViewModel.name.observe(viewLifecycleOwner) {
+                if (it.isNotEmpty() && it.isNotBlank()) {
                     collapsingToolbarLayout.title = it
                     name.setText(it)
-                }else{
+                } else {
                     collapsingToolbarLayout.title = "Untitled"
                     name.setText("")
                 }
                 name.alpha = 0f
             }
 
-            productViewModel.quantity.observe(viewLifecycleOwner){
+            productViewModel.quantity.observe(viewLifecycleOwner) {
                 content.quantity.text = it.toString()
             }
 
-            productViewModel.expiry.observe(viewLifecycleOwner){
+            productViewModel.expiry.observe(viewLifecycleOwner) {
                 content.expiry.text = DateFormat.format(getString(R.string.date_pattern_vn), it)
             }
 
-            productViewModel.thumb.observe(viewLifecycleOwner){
+            productViewModel.thumb.observe(viewLifecycleOwner) {
                 loadProductImage(it)
             }
 
-            productViewModel.reminder.observe(viewLifecycleOwner){
-                content.reminder.text = DateFormat.format(getString(R.string.reminder_date_pattern), it)
+            productViewModel.reminder.observe(viewLifecycleOwner) {
+                content.reminder.text =
+                    DateFormat.format(getString(R.string.reminder_date_pattern), it)
             }
 
             Unit
@@ -284,12 +279,12 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                         productThumbActions[actionIndex].invoke()
                     }
 
-                    if (contains(NumberPickerFragment.KEY_SELECTED_VALUE)){
+                    if (contains(NumberPickerFragment.KEY_SELECTED_VALUE)) {
                         val quantity = pop<Int>(NumberPickerFragment.KEY_SELECTED_VALUE)!!
                         productViewModel.setQuantity(quantity)
                     }
 
-                    if (contains(ReminderPickerFragment.KEY_REMIND_INFO)){
+                    if (contains(ReminderPickerFragment.KEY_REMIND_INFO)) {
                         val remindInfo = pop<RemindInfo>(ReminderPickerFragment.KEY_REMIND_INFO)!!
                         productViewModel.setReminder(remindInfo)
                     }
@@ -388,16 +383,18 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         outState.putParcelable(KEY_PHOTO_URI, photoUri)
     }
 
-    override fun onDestroy() {
-        if (this is AddProductFragment) {
-            super.onDestroy()
-            return
-        }
-
-        if (productViewModel.productAndRemindInfo.value != loadedProduct){
-            AlarmUtils.update(requireContext(), productViewModel.productAndRemindInfo.value!!.remindInfo)
+    open fun onDestroyImp() {
+        if (productViewModel.productAndRemindInfo.value != loadedProduct) {
+            AlarmUtils.update(
+                requireContext(),
+                productViewModel.productAndRemindInfo.value!!.remindInfo
+            )
             productsViewModel.update(productViewModel.productAndRemindInfo.value!!)
         }
+    }
+
+    override fun onDestroy() {
+        onDestroyImp()
         super.onDestroy()
     }
 
@@ -474,6 +471,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     }
 
     companion object {
+        private val TAG = EditProductFragment::class.java.simpleName
         private const val REQUEST_TAKE_PHOTO = 0
         private const val REQUEST_IMAGE_GET = 1
 

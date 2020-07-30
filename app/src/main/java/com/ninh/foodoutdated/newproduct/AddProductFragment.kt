@@ -4,12 +4,16 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.lifecycle.observe
 import androidx.navigation.NavController
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.RepeatingType
 import com.ninh.foodoutdated.editproduct.EditProductFragment
 import java.util.*
+import kotlin.reflect.KFunction1
+import kotlin.reflect.KFunction3
+import kotlin.reflect.KFunction4
 
 class AddProductFragment : EditProductFragment() {
 
@@ -21,37 +25,17 @@ class AddProductFragment : EditProductFragment() {
         productViewModel.loadDefaultProduct()
     }
 
-    override fun getActionToDatePickerFragment(pickingDate: Calendar) =
-        AddProductFragmentDirections.actionAddProductFragmentToDatePickerFragment(pickingDate)
+    override val actionToDatePickerFragmentFunc =
+        (AddProductFragmentDirections)::actionAddProductFragmentToDatePickerFragment
 
-    override fun getActionToNumberPickerFragment(
-        startValue: Int,
-        endValue: Int,
-        selectedValue: Int
-    ) =
-        AddProductFragmentDirections.actionAddProductFragmentToNumberPickerFragment(
-            startValue,
-            endValue,
-            selectedValue
-        )
+    override val actionToNumberPickerFragmentFunc =
+        (AddProductFragmentDirections)::actionAddProductFragmentToNumberPickerFragment
 
-    override fun getActionToReminderPickerFragment(
-        expiry: Calendar,
-        triggerDate: Calendar?,
-        triggerTime: Calendar?,
-        repeatingType: RepeatingType
-    ) =
-        AddProductFragmentDirections.actionAddProductFragmentToReminderPickerFragment(
-            expiry,
-            triggerDate,
-            triggerTime,
-            repeatingType
-        )
+    override val actionToReminderPickerFragmentFunc =
+        (AddProductFragmentDirections)::actionAddProductFragmentToReminderPickerFragment
 
-    override fun getActionToProductThumbActionFragment(photoFilePath: String?) =
-        AddProductFragmentDirections.actionAddProductFragmentToProductThumbActionFragment(
-            photoFilePath
-        )
+    override val actionToProductThumbActionFragmentFunc =
+        (AddProductFragmentDirections)::actionAddProductFragmentToProductThumbActionFragment
 
     override fun getThisBackStackEntry(navController: NavController) =
         navController.getBackStackEntry(R.id.addProductFragment)
@@ -85,6 +69,8 @@ class AddProductFragment : EditProductFragment() {
             else -> false
         }
     }
+
+    override fun onDestroyImp() = Unit
 
     private fun validate(): Boolean {
         var isValid = true

@@ -134,10 +134,10 @@ class ReminderPickerTextView
         triggerDate.timeInMillis = expiryDate.timeInMillis
         with(resources){
             when(timeBeforeExpiry){
-                getString(R.string.a_week) -> triggerDate.add(Calendar.DAY_OF_MONTH, -7)
-                getString(R.string.fifteen_date) -> triggerDate.add(Calendar.DAY_OF_MONTH, -15)
-                getString(R.string.a_month) -> triggerDate.add(Calendar.MONTH, -1)
-                getString(R.string.three_month) -> triggerDate.add(Calendar.MONTH, -3)
+                getString(R.string.a_week_before) -> triggerDate.add(Calendar.DAY_OF_MONTH, -7)
+                getString(R.string.fifteen_date_before) -> triggerDate.add(Calendar.DAY_OF_MONTH, -15)
+                getString(R.string.a_month_before) -> triggerDate.add(Calendar.MONTH, -1)
+                getString(R.string.three_month_before) -> triggerDate.add(Calendar.MONTH, -3)
                 else -> throw RuntimeException("Trigger date not valid")
             }
         }
