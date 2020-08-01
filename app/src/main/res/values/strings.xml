@@ -29,10 +29,17 @@
     <string name="date_pattern_vn">dd/MM/yyyy</string>
     <string name="sql_date_pattern">yyyy-mm-dd</string>
     <string name="reminder_date_pattern">MMM dd, yyyy</string>
+    <string name="reminder_date_time">MMM dd, yyyy HH:mm</string>
+    <string name="standard_time_format">HH:mm</string>
 
     <string name="action_take_photo">Take photo</string>
     <string name="action_pick_from_gallery">Pick from gallery</string>
     <string name="action_remove_photo">Remove photo</string>
 
     <string name="icon_credit">Icons made by <a href="https://www.flaticon.com/authors/fjstudio" title="fjstudio">fjstudio</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a></string>
+    <string name="morning">Morning</string>
+    <string name="afternoon">Afternoon</string>
+    <string name="evening">Evening</string>
+    <string name="night">Night</string>
+    <string name="pick_a_time">Pick a time</string>
 </resources>

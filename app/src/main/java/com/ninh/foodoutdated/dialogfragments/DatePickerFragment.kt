@@ -7,11 +7,10 @@ import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.ninh.foodoutdated.extensions.CalendarExtension
+import com.ninh.foodoutdated.extensions.CalendarUtils
 import com.ninh.foodoutdated.extensions.day
 import com.ninh.foodoutdated.extensions.month
 import com.ninh.foodoutdated.extensions.year
-import java.util.*
 
 class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
@@ -26,7 +25,7 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, dayOfMonth: Int) {
         findNavController().previousBackStackEntry?.savedStateHandle?.apply {
-            val pickedDate = CalendarExtension.getCalendarInstanceFrom(year, month, dayOfMonth)
+            val pickedDate = CalendarUtils.getCalendarFrom(year, month, dayOfMonth)
             set(KEY_PICKED_DATE, pickedDate)
         }
     }

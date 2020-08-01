@@ -22,6 +22,9 @@ import com.ninh.foodoutdated.databinding.ReminderPickerLayoutBinding
 
 import com.ninh.foodoutdated.dialogfragments.adapters.RepeatingTypeAdapter
 import com.ninh.foodoutdated.dialogfragments.adapters.TriggerDateAdapter
+import com.ninh.foodoutdated.dialogfragments.adapters.TriggerTimeAdapter
+import com.ninh.foodoutdated.extensions.hour
+import com.ninh.foodoutdated.extensions.minute
 import com.ninh.foodoutdated.extensions.pop
 import java.util.*
 
@@ -33,17 +36,21 @@ class ReminderPickerFragment : DialogFragment(),
     val expiry: Calendar = Calendar.getInstance()
 
     private val triggerDateValue: Calendar
-        get() = triggerDate.getValueFromExpiry(expiry)
+        get() = triggerDate.getValueFromExpiry(expiry).apply {
+            set(Calendar.HOUR_OF_DAY, triggerTime.value.hour)
+            set(Calendar.MINUTE, triggerTime.value.minute)
+        }
 
     private var repeatingType = RepeatingType.DAILY
 
     private val triggerDates = TriggerDate.values()
     var triggerDate: TriggerDate = triggerDates[0]
 
-    private val args: ReminderPickerFragmentArgs by navArgs()
-    private var isUserTouchTriggerSpinner = false
+    private val triggerTimes = TriggerTime.constValues
+    var triggerTime: TriggerTime = triggerTimes[0]
 
-    @SuppressLint("ClickableViewAccessibility")
+    private val args: ReminderPickerFragmentArgs by navArgs()
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = requireActivity().layoutInflater
         binding = ReminderPickerLayoutBinding.inflate(inflater, null, false)
@@ -51,25 +58,24 @@ class ReminderPickerFragment : DialogFragment(),
         val argsExpiry: Calendar = args.expiry
         val argsTriggerDateValue: Calendar = args.triggerDate
         val argsRepeatingType: RepeatingType = args.repeatType
+        val timeInMillis = argsTriggerDateValue.timeInMillis
 
         expiry.timeInMillis = argsExpiry.timeInMillis
-        triggerDate = TriggerDate.fromExpiryAndTriggerDateValue(expiry, argsTriggerDateValue)
+        triggerDate = TriggerDate.fromExpiryAndTriggerDateValue(expiry, timeInMillis)
+        triggerTime = TriggerTime.fromTriggerTimeValue(timeInMillis)
         repeatingType = argsRepeatingType
 
         with(binding) {
             triggerDateSpinner.adapter = TriggerDateAdapter(triggerDates, argsExpiry)
+            triggerTimeSpinner.adapter = TriggerTimeAdapter(triggerTimes)
             repeatTypeSpinner.adapter = RepeatingTypeAdapter()
-            triggerDateSpinner.setOnTouchListener { v, event ->
-                if (event.action == MotionEvent.ACTION_DOWN){
-                    isUserTouchTriggerSpinner = true
-                }
-                return@setOnTouchListener false
-            }
 
             triggerDateSpinner.onItemSelectedListener = this@ReminderPickerFragment
+            triggerTimeSpinner.onItemSelectedListener = this@ReminderPickerFragment
             repeatTypeSpinner.onItemSelectedListener = this@ReminderPickerFragment
 
             triggerDateSpinner.setSelection(triggerDate.ordinal)
+            triggerTimeSpinner.setSelection(triggerTime.ordinal)
             repeatTypeSpinner.setSelection(repeatingType.ordinal)
         }
 
@@ -90,25 +96,39 @@ class ReminderPickerFragment : DialogFragment(),
 
     override fun onNothingSelected(parent: AdapterView<*>) = Unit
 
-    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-        val item = parent.getItemAtPosition(position)
+    override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) =
+        with(binding) {
+            val item = parent.getItemAtPosition(position)
 
-        if (parent.id == binding.triggerDateSpinner.id) {
-            triggerDate = item as TriggerDate
-            if (triggerDate == TriggerDate.PICK_A_DATE && isUserTouchTriggerSpinner) {
-                val action =
-                    ReminderPickerFragmentDirections.actionReminderPickerFragmentToDatePickerFragment(
-                        triggerDate.value
-                    )
+            if (parent.id == triggerDateSpinner.id) {
+                triggerDate = item as TriggerDate
+                if (triggerDate == TriggerDate.PICK_A_DATE && triggerDateSpinner.isSelectionFromUser) {
+                    val action =
+                        ReminderPickerFragmentDirections.actionReminderPickerFragmentToDatePickerFragment(
+                            triggerDate.value
+                        )
 
-                findNavController().navigate(action)
+                    findNavController().navigate(action)
+                }
             }
-        }
 
-        if (parent.id == binding.repeatTypeSpinner.id) {
-            repeatingType = item as RepeatingType
+            if (parent.id == triggerTimeSpinner.id){
+                triggerTime = item as TriggerTime
+                if (triggerTime == TriggerTime.PICK_A_TIME && triggerTimeSpinner.isSelectionFromUser){
+                    val action =
+                        ReminderPickerFragmentDirections.actionReminderPickerFragmentToTimePickerFragment(
+                            triggerTime.value
+                        )
+
+                    findNavController().navigate(action)
+                }
+            }
+
+            if (parent.id == repeatTypeSpinner.id) {
+                repeatingType = item as RepeatingType
+            }
+            Unit
         }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -117,22 +137,28 @@ class ReminderPickerFragment : DialogFragment(),
     ): View? {
 
         val navBackStackEntry = findNavController().getBackStackEntry(R.id.reminderPickerFragment)
-        val observer = LifecycleEventObserver {_, event ->
-            if (event == Lifecycle.Event.ON_RESUME){
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
 
-                with(navBackStackEntry.savedStateHandle){
-                    if (contains(DatePickerFragment.KEY_PICKED_DATE)){
+                with(navBackStackEntry.savedStateHandle) {
+                    if (contains(DatePickerFragment.KEY_PICKED_DATE)) {
                         val pickedDate = pop<Calendar>(DatePickerFragment.KEY_PICKED_DATE)!!
                         triggerDate.value = pickedDate
                         (binding.triggerDateSpinner.adapter as TriggerDateAdapter).notifyDataSetChanged()
+                    }
+
+                    if (contains(TimePickerFragment.KEY_PICKED_TIME)){
+                        val pickedTime = pop<Calendar>(TimePickerFragment.KEY_PICKED_TIME)!!
+                        triggerTime.value.timeInMillis = pickedTime.timeInMillis
+                        (binding.triggerTimeSpinner.adapter as TriggerTimeAdapter).notifyDataSetChanged()
                     }
                 }
             }
         }
 
         navBackStackEntry.lifecycle.addObserver(observer)
-        lifecycle.addObserver(LifecycleEventObserver{_, event ->
-            if (event == Lifecycle.Event.ON_DESTROY){
+        lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
                 navBackStackEntry.lifecycle.removeObserver(observer)
             }
         })

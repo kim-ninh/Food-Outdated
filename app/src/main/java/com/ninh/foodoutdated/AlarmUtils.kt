@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.ninh.foodoutdated.data.models.RemindInfo
+import com.orhanobut.logger.Logger
 
 object AlarmUtils {
     fun add(context: Context, remindInfo: RemindInfo) {
@@ -12,15 +13,16 @@ object AlarmUtils {
         val intent = AlarmReceiver.newIntent(context, remindInfo.productId)
         val pendingIntent = PendingIntent.getBroadcast(context, remindInfo.requestCode, intent, 0)
 
+        Logger.i("Trigger Date: ${remindInfo.triggerDate.time}")
         if (remindInfo.repeating.toTimeDurationInMillis == 0L) {
             alarmManager.set(
-                AlarmManager.RTC,
+                AlarmManager.RTC_WAKEUP,
                 remindInfo.triggerDate.timeInMillis,
                 pendingIntent
             )
         } else {
             alarmManager.setInexactRepeating(
-                AlarmManager.RTC,
+                AlarmManager.RTC_WAKEUP,
                 remindInfo.triggerDate.timeInMillis,
                 remindInfo.repeating.toTimeDurationInMillis,
                 pendingIntent

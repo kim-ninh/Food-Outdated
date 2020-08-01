@@ -162,6 +162,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             val triggerDate = reminder.value!!
             val repeatingType = productAndRemindInfo.value!!.remindInfo.repeating
 
+            Logger.d("TriggerTime: ${triggerDate.hour}:${triggerDate.minute}")
             actionToReminderPickerFragmentFunc.invoke(expiry, triggerDate, repeatingType)
         }
 
@@ -251,7 +252,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
             productViewModel.reminder.observe(viewLifecycleOwner) {
                 content.reminder.text =
-                    DateFormat.format(getString(R.string.reminder_date_pattern), it)
+                    DateFormat.format(getString(R.string.reminder_date_time), it)
             }
 
             Unit

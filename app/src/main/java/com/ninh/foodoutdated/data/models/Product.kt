@@ -2,6 +2,7 @@ package com.ninh.foodoutdated.data.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ninh.foodoutdated.extensions.CalendarUtils
 import java.io.File
 import java.util.*
 
@@ -30,6 +31,16 @@ data class Product(
             }
             return newState
         }
+
+    fun copy(): Product =
+        Product(
+            this.name,
+            this.quantity,
+            CalendarUtils.getCalendarFrom(expiry.timeInMillis),
+            thumb?.let { File(it.absolutePath) },
+            this.isValid,
+            this.id
+        )
 
     companion object {
         private const val remainDayUtilWarn = 15

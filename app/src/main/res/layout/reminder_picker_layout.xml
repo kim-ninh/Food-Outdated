@@ -15,6 +15,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.ninh.foodoutdated.customview.NSpinner
+        android:id="@+id/trigger_time_spinner"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/trigger_time_item"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/trigger_date_spinner"
+        />
+
     <Spinner
         android:id="@+id/repeat_type_spinner"
         android:layout_width="0dp"
@@ -23,5 +33,5 @@
         tools:listitem="@layout/simple_spinner_item"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/trigger_date_spinner" />
+        app:layout_constraintTop_toBottomOf="@+id/trigger_time_spinner" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.ninh.foodoutdated.extensions.CalendarUtils
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
@@ -15,7 +16,15 @@ data class RemindInfo(
     var repeating: RepeatingType = RepeatingType.NO_REPEAT,
     var isValid: Boolean = true,
     @PrimaryKey var productId: Int = 0
-): Parcelable {
+) : Parcelable {
     val requestCode: Int
         get() = productId
+
+    fun copy(): RemindInfo =
+        RemindInfo(
+            CalendarUtils.getCalendarFrom(triggerDate.timeInMillis),
+            this.repeating,
+            this.isValid,
+            this.productId
+        )
 }

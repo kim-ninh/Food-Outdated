@@ -8,7 +8,7 @@ import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.ninh.foodoutdated.extensions.CalendarExtension
+import com.ninh.foodoutdated.extensions.CalendarUtils
 import com.ninh.foodoutdated.extensions.hour
 import com.ninh.foodoutdated.extensions.minute
 
@@ -27,7 +27,7 @@ class TimePickerFragment : DialogFragment(),
 
     override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
         findNavController().previousBackStackEntry?.savedStateHandle?.apply {
-            val pickedTime = CalendarExtension.getCalendarInstanceFrom(hourOfDay, minute)
+            val pickedTime = CalendarUtils.getCalendarFrom(hourOfDay, minute)
             set(KEY_PICKED_TIME, pickedTime)
         }
     }

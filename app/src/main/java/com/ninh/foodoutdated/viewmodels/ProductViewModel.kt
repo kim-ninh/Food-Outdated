@@ -81,13 +81,13 @@ class ProductViewModel: ViewModel() {
         }
     }
 
-    fun setProduct(productAndRemindInfo: ProductAndRemindInfo) = with(productAndRemindInfo) {
-        _productAndRemindInfo.value = this
-        setThumb(product.thumb)
-        setName(product.name)
-        setQuantity(product.quantity)
-        setExpiry(product.expiry)
-        setReminder(remindInfo)
+    fun setProduct(productAndRemindInfo: ProductAndRemindInfo)  {
+        _productAndRemindInfo.value = productAndRemindInfo.copy()
+        setThumb(productAndRemindInfo.product.thumb)
+        setName(productAndRemindInfo.product.name)
+        setQuantity(productAndRemindInfo.product.quantity)
+        setExpiry(productAndRemindInfo.product.expiry)
+        setReminder(productAndRemindInfo.remindInfo)
     }
 
     fun loadDefaultProduct(){

@@ -10,4 +10,7 @@ data class ProductAndRemindInfo(
         entityColumn = "productId"
     )
     val remindInfo: RemindInfo
-)
+){
+    fun copy(): ProductAndRemindInfo =
+        ProductAndRemindInfo(product.copy(), remindInfo.copy())
+}

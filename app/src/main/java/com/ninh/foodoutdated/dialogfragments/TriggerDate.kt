@@ -2,6 +2,7 @@ package com.ninh.foodoutdated.dialogfragments
 
 import androidx.annotation.StringRes
 import com.ninh.foodoutdated.R
+import com.ninh.foodoutdated.extensions.CalendarUtils
 import com.ninh.foodoutdated.extensions.isDateEquals
 import java.util.*
 
@@ -50,16 +51,16 @@ enum class TriggerDate(
     companion object {
         fun fromExpiryAndTriggerDateValue(
             expiry: Calendar,
-            triggerDateValue: Calendar
+            timeInMillis: Long
         ): TriggerDate {
 
             val triggerDates = values()
-
+            val someDay = CalendarUtils.getCalendarFrom(timeInMillis)
             return triggerDates.find {
-                it.getValueFromExpiry(expiry).isDateEquals(triggerDateValue)
+                it.getValueFromExpiry(expiry).isDateEquals(someDay)
             }
                 ?: PICK_A_DATE.apply {
-                    value = triggerDateValue
+                    value.timeInMillis = timeInMillis
                 }
         }
 
@@ -72,14 +73,5 @@ enum class TriggerDate(
                 else -> throw IllegalArgumentException("String resource not valid")
             }
         }
-    }
-}
-
-fun main() {
-    val values1 = TriggerDate.values()
-
-    values1[0] = TriggerDate.PICK_A_DATE
-    values1.forEach {
-        println(it)
     }
 }
