@@ -40,7 +40,6 @@ import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
 import com.ninh.foodoutdated.data.models.RemindInfo
-import com.ninh.foodoutdated.data.models.RepeatingType
 import com.ninh.foodoutdated.databinding.FragmentEditProductBinding
 import com.ninh.foodoutdated.dialogfragments.DatePickerFragment
 import com.ninh.foodoutdated.dialogfragments.NumberPickerFragment
@@ -386,9 +385,10 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
     open fun onDestroyImp() {
         if (productViewModel.productAndRemindInfo.value != loadedProduct) {
+            Logger.i("Updating product: ${productViewModel.productAndRemindInfo.value.toString()}")
             AlarmUtils.update(
                 requireContext(),
-                productViewModel.productAndRemindInfo.value!!.remindInfo
+                productViewModel.productAndRemindInfo.value!!
             )
             productsViewModel.update(productViewModel.productAndRemindInfo.value!!)
         }

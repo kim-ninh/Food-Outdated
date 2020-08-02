@@ -65,10 +65,6 @@ class ProductViewModel: ViewModel() {
 
         productAndRemindInfo.value?.apply {
             product.expiry = expiry
-
-            val defaultTriggerDateValue = TriggerDate.A_WEEK_BEFORE.getValueFromExpiry(expiry)
-            remindInfo.triggerDate.timeInMillis = defaultTriggerDateValue.timeInMillis
-            _reminder.value = remindInfo.triggerDate
         }
     }
 
@@ -92,6 +88,12 @@ class ProductViewModel: ViewModel() {
 
     fun loadDefaultProduct(){
         val defaultProductAndRemindInfo = ProductAndRemindInfo(Product(), RemindInfo())
+            .apply {
+                val defaultTriggerDateValue = TriggerDate.A_WEEK_BEFORE
+                    .getValueFromExpiry(product.expiry)
+
+                remindInfo.triggerDate.timeInMillis = defaultTriggerDateValue.timeInMillis
+            }
         setProduct(defaultProductAndRemindInfo)
     }
 }

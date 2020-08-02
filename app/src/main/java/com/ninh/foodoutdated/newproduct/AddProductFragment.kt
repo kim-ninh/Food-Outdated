@@ -4,16 +4,11 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.lifecycle.observe
 import androidx.navigation.NavController
-import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.R
-import com.ninh.foodoutdated.data.models.RepeatingType
+import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
 import com.ninh.foodoutdated.editproduct.EditProductFragment
-import java.util.*
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KFunction3
-import kotlin.reflect.KFunction4
 
 class AddProductFragment : EditProductFragment() {
 
@@ -51,10 +46,10 @@ class AddProductFragment : EditProductFragment() {
                                 TAG,
                                 "product inserted, id: $newId"
                             )
-                            val remindInfo =
-                                productViewModel.productAndRemindInfo.value!!.remindInfo
-                            remindInfo.productId = newId
-                            AlarmUtils.add(requireContext(), remindInfo)
+                            val productAndRemindInfo = productViewModel.productAndRemindInfo.value!!
+                            val product = productAndRemindInfo.product.copy(id = newId)
+                            val remindInfo = productAndRemindInfo.remindInfo.copy(productId = newId)
+                            AlarmUtils.add(requireContext(), ProductAndRemindInfo(product, remindInfo))
                             findNavController()
                                 .previousBackStackEntry
                                 ?.savedStateHandle

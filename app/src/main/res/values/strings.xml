@@ -42,4 +42,6 @@
     <string name="evening">Evening</string>
     <string name="night">Night</string>
     <string name="pick_a_time">Pick a time</string>
+    <string name="channel_name">reminder</string>
+    <string name="channel_description">Food outdated reminder</string>
 </resources>
