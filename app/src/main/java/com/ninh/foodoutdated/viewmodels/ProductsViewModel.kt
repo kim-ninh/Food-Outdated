@@ -3,7 +3,7 @@ package com.ninh.foodoutdated.viewmodels
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import com.ninh.foodoutdated.MyApplication
+import com.ninh.foodoutdated.FoodOutdatedApplication
 import com.ninh.foodoutdated.data.ProductDatabase
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
@@ -17,7 +17,7 @@ class ProductsViewModel(application: Application) : AndroidViewModel(application
     val totalRowDeleted: LiveData<Int>
 
     init {
-        val executor = (application as MyApplication).workerExecutor
+        val executor = (application as FoodOutdatedApplication).workerExecutor
         val productDao = ProductDatabase.getDatabase(application.applicationContext)
             .productDao()
 
@@ -27,7 +27,7 @@ class ProductsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun load(id: Int) =
-        productRepo.load(id)
+        productRepo.loadAsync(id)
 
     fun insert(productAndRemindInfo: ProductAndRemindInfo) =
         productRepo.insert(productAndRemindInfo)

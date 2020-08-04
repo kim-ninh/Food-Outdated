@@ -3,15 +3,16 @@ package com.ninh.foodoutdated
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
+import androidx.core.app.AlarmManagerCompat
 import androidx.core.content.ContextCompat
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
 import com.ninh.foodoutdated.data.models.RemindInfo
 import com.orhanobut.logger.Logger
 
 object AlarmUtils {
-    fun add(context: Context, productAndRemindInfo: ProductAndRemindInfo) = with(productAndRemindInfo) {
+    fun add(context: Context, remindInfo: RemindInfo) {
         val alarmManager = ContextCompat.getSystemService(context, AlarmManager::class.java)!!
-        val intent = AlarmReceiver.newIntent(context, product)
+        val intent = AlarmReceiver.newIntent(context, remindInfo.productId)
         val pendingIntent = PendingIntent.getBroadcast(context, remindInfo.requestCode, intent, 0)
 
         Logger.i("Trigger Date: ${remindInfo.triggerDate.time}")
@@ -65,10 +66,10 @@ object AlarmUtils {
         }
     }
 
-    fun update(context: Context, productAndRemindInfo: ProductAndRemindInfo) = with(productAndRemindInfo){
+    fun update(context: Context, remindInfo: RemindInfo) {
 
         val alarmManager = ContextCompat.getSystemService(context, AlarmManager::class.java)!!
-        val intent = AlarmReceiver.newIntent(context, product)
+        val intent = AlarmReceiver.newIntent(context, remindInfo.productId)
         val pendingIntent: PendingIntent =
             PendingIntent.getBroadcast(
                 context,

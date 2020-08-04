@@ -8,7 +8,10 @@ import com.ninh.foodoutdated.data.models.RemindInfo
 interface RemindInfoDao {
 
     @Query("SELECT * FROM remind_info WHERE isValid = 1")
-    fun loadAll(): LiveData<List<RemindInfo>>
+    fun loadAllAsync(): LiveData<List<RemindInfo>>
+
+    @Query("SELECT * FROM remind_info WHERE isValid = 1")
+    fun loadAll(): List<RemindInfo>
 
     @Query("SELECT * FROM remind_info WHERE productId = :id AND isValid = 1 LIMIT 1")
     fun load(id: Int): LiveData<RemindInfo>

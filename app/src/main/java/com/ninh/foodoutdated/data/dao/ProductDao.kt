@@ -10,12 +10,15 @@ import com.ninh.foodoutdated.data.models.RemindInfo
 abstract class ProductDao {
 
     @Query("SELECT * FROM products WHERE isValid = 1 ORDER BY expiry ASC")
-    abstract fun loadAll(): LiveData<List<Product>>
+    abstract fun loadAllAsync(): LiveData<List<Product>>
 
     @Transaction
     @Query("SELECT * FROM products WHERE id = :productId AND isValid = 1 LIMIT 1")
-    abstract fun load(productId: Int): LiveData<ProductAndRemindInfo>
+    abstract fun loadAsync(productId: Int): LiveData<ProductAndRemindInfo>
 
+    @Transaction
+    @Query("SELECT * FROM products WHERE id = :productId AND isValid = 1 LIMIT 1")
+    abstract fun load(productId: Int): ProductAndRemindInfo
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     abstract fun _insertProduct(product: Product): Long

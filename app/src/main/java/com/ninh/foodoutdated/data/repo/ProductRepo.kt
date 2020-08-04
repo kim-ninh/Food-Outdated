@@ -17,7 +17,10 @@ class ProductRepo(
         get() = _totalRowDeletedObserver
 
 
-    val allProducts: LiveData<List<Product>> = productDao.loadAll()
+    val allProducts: LiveData<List<Product>> = productDao.loadAllAsync()
+
+    fun loadAsync(id: Int) =
+        productDao.loadAsync(id)
 
     fun load(id: Int) =
         productDao.load(id)

@@ -3,6 +3,9 @@ package com.ninh.foodoutdated
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import com.orhanobut.logger.AndroidLogAdapter
@@ -10,7 +13,7 @@ import com.orhanobut.logger.Logger
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class MyApplication : Application() {
+class FoodOutdatedApplication : Application() {
 
     val workerExecutor: ExecutorService by lazy {
         val executorService = Executors.newSingleThreadExecutor()
@@ -22,6 +25,7 @@ class MyApplication : Application() {
 
         Logger.addLogAdapter(AndroidLogAdapter())
         createNotificationChannel()
+        enableBootCompleteReceiver(applicationContext)
     }
 
     private fun createNotificationChannel() {
@@ -42,5 +46,14 @@ class MyApplication : Application() {
             )!!
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private fun enableBootCompleteReceiver(context: Context) {
+        val receiver = ComponentName(context, BootCompleteReceiver::class.java)
+        context.packageManager.setComponentEnabledSetting(
+            receiver,
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
+        )
     }
 }

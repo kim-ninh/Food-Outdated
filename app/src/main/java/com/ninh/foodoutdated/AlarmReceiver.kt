@@ -5,32 +5,41 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import com.ninh.foodoutdated.data.ProductDatabase
 import com.ninh.foodoutdated.data.models.Product
+import com.ninh.foodoutdated.data.repo.ProductRepo
 import com.ninh.foodoutdated.extensions.CalendarUtils
 import com.orhanobut.logger.Logger
+import java.util.concurrent.Executors
 
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val product = getProductFromBundle(intent.extras)
-        createNotificationAndNotify(context, product)
-        Logger.i("Alarm triggered with product: ${product.id}")
-    }
-
-    private fun getProductFromBundle(bundle: Bundle?): Product{
-        if (bundle == null)
-            return Product()
-
-        val productId = bundle.getInt(KEY_PRODUCT_ID)
-        val productName = bundle.getString(KEY_PRODUCT_NAME)!!
-        val productExpiry = bundle.getLong(KEY_PRODUCT_EXPIRY).let {
-            CalendarUtils.getCalendarFrom(it)
+        val productId = intent.getIntExtra(KEY_PRODUCT_ID, -1)
+        Logger.i("Alarm triggered with product: $productId")
+        if (productId == -1){
+            return
         }
 
-        return Product(productName, expiry = productExpiry, id = productId)
+        val pendingResult: PendingResult = goAsync()
+        val executorService = Executors.newSingleThreadExecutor()
+        val productDao = ProductDatabase.getDatabase(context.applicationContext).productDao()
+        val productRepo = ProductRepo(executorService, productDao)
+        val uiHandler = Handler(context.mainLooper)
+
+        executorService.submit {
+            val productAndRemindInfo = productRepo.load(productId)
+            uiHandler.post {
+                createNotificationAndNotify(context, productAndRemindInfo.product)
+                pendingResult.finish()
+            }
+        }
     }
 
     private fun createNotificationAndNotify(context: Context, product: Product){
@@ -64,15 +73,6 @@ class AlarmReceiver : BroadcastReceiver() {
                 putExtra(KEY_PRODUCT_ID, productId)
             }
 
-        fun newIntent(context: Context, product: Product) =
-            Intent(context, AlarmReceiver::class.java).apply {
-                putExtra(KEY_PRODUCT_ID, product.id)
-                putExtra(KEY_PRODUCT_NAME, product.name)
-                putExtra(KEY_PRODUCT_EXPIRY, product.expiry.timeInMillis)
-            }
-
         private const val KEY_PRODUCT_ID = "PRODUCT_ID"
-        private const val KEY_PRODUCT_NAME = "PRODUCT_NAME"
-        private const val KEY_PRODUCT_EXPIRY = "PRODUCT_EXPIRY"
     }
 }

@@ -35,7 +35,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.AlarmUtils
-import com.ninh.foodoutdated.MyApplication
+import com.ninh.foodoutdated.FoodOutdatedApplication
 import com.ninh.foodoutdated.R
 import com.ninh.foodoutdated.data.models.Product
 import com.ninh.foodoutdated.data.models.ProductAndRemindInfo
@@ -70,7 +70,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     protected val productViewModel: ProductViewModel by viewModels()
 
     protected val executorService by lazy {
-        (requireActivity().application as MyApplication)
+        (requireActivity().application as FoodOutdatedApplication)
             .workerExecutor
     }
 
@@ -388,7 +388,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             Logger.i("Updating product: ${productViewModel.productAndRemindInfo.value.toString()}")
             AlarmUtils.update(
                 requireContext(),
-                productViewModel.productAndRemindInfo.value!!
+                productViewModel.productAndRemindInfo.value!!.remindInfo
             )
             productsViewModel.update(productViewModel.productAndRemindInfo.value!!)
         }

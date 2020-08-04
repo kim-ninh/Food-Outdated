@@ -46,10 +46,8 @@ class AddProductFragment : EditProductFragment() {
                                 TAG,
                                 "product inserted, id: $newId"
                             )
-                            val productAndRemindInfo = productViewModel.productAndRemindInfo.value!!
-                            val product = productAndRemindInfo.product.copy(id = newId)
-                            val remindInfo = productAndRemindInfo.remindInfo.copy(productId = newId)
-                            AlarmUtils.add(requireContext(), ProductAndRemindInfo(product, remindInfo))
+                            val remindInfo = productViewModel.productAndRemindInfo.value!!.remindInfo
+                            AlarmUtils.add(requireContext(), remindInfo)
                             findNavController()
                                 .previousBackStackEntry
                                 ?.savedStateHandle
