@@ -13,9 +13,7 @@ class NumberPickerFragment : DialogFragment() {
     private val args: NumberPickerFragmentArgs by navArgs()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        if (args.endValue - args.startValue + 1 < 1) {
-            throw IllegalArgumentException("endValue must >= than startValue")
-        }
+        require(args.endValue - args.startValue + 1 < 1) { "endValue must >= startValue" }
 
         val numberPicker = NumberPicker(requireContext()).apply {
             minValue = args.startValue

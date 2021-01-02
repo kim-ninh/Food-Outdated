@@ -22,8 +22,10 @@ import com.ninh.foodoutdated.databinding.FragmentProductsBinding
 import com.ninh.foodoutdated.newproduct.AddProductFragment
 import com.ninh.foodoutdated.viewmodels.ProductsViewModel
 import com.orhanobut.logger.Logger
+import kotlin.properties.Delegates
 
-class ProductsFragment : Fragment(R.layout.fragment_products) {
+class ProductsFragment : Fragment(R.layout.fragment_products),
+    ActionMode.Callback {
 
     private val productsViewModel: ProductsViewModel by viewModels {
         ViewModelProvider.AndroidViewModelFactory(requireActivity().application)
@@ -36,44 +38,42 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
 
     private var actionMode: ActionMode? = null
 
-    private var actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            return when (item.itemId) {
-                R.id.item_delete -> {
-                    val selection = selectionTracker.selection
-                    val selectedIds = IntArray(selection.size())
-                    val it: Iterator<Long> = selection.iterator()
-                    var i = 0
-                    while (it.hasNext()) {
-                        selectedIds[i++] = it.next().toInt()
-                    }
-                    AlarmUtils.delete(requireContext(), selectedIds)
-                    productsViewModel.delete(selectedIds)
-                    true
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem) =
+        when (item.itemId) {
+            R.id.item_delete -> {
+                val selection = selectionTracker.selection
+                val selectedIds = IntArray(selection.size())
+                val it: Iterator<Long> = selection.iterator()
+                var i = 0
+                while (it.hasNext()) {
+                    selectedIds[i++] = it.next().toInt()
                 }
-                else -> false
+                AlarmUtils.delete(requireContext(), selectedIds)
+                productsViewModel.delete(selectedIds)
+                true
             }
+            else -> false
         }
 
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            val inflater = mode.menuInflater
-            inflater.inflate(R.menu.delete_context, menu)
-            return true
-        }
+    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+        val inflater = mode.menuInflater
+        inflater.inflate(R.menu.delete_context, menu)
+        return true
+    }
 
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            val totalSelection = selectionTracker.selection.size()
-            mode.title = "$totalSelection item selected"
-            return true
-        }
+    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+        val totalSelection = selectionTracker.selection.size()
+        mode.title = "$totalSelection item selected"
+        return true
+    }
 
-        override fun onDestroyActionMode(mode: ActionMode) {
-            actionMode = null
-            if (selectionTracker.selection.size() != 0) {
-                selectionTracker.clearSelection()
-            }
+    override fun onDestroyActionMode(mode: ActionMode) {
+        actionMode = null
+        if (selectionTracker.selection.size() != 0) {
+            selectionTracker.clearSelection()
         }
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -86,7 +86,6 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
         val itemSpacingInPixel = resources.getDimensionPixelSize(R.dimen.item_spacing)
 
         binding.productsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
             adapter = productAdapter
             addItemDecoration(SpacingItemDecoration(itemSpacingInPixel))
         }
@@ -111,7 +110,7 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
                 val totalSelection = selectionTracker.selection.size()
                 if (actionMode == null && totalSelection == 1) {
                     actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(
-                        actionModeCallback
+                        this@ProductsFragment
                     )
                 }
                 actionMode?.invalidate()
@@ -152,8 +151,8 @@ class ProductsFragment : Fragment(R.layout.fragment_products) {
             ?.savedStateHandle
 
         savedStateHandle?.getLiveData<Boolean>(AddProductFragment.KEY_IS_ADD_SUCCESSFUL)
-            ?.observe(viewLifecycleOwner){
-                if (it == false){
+            ?.observe(viewLifecycleOwner) {
+                if (it == false) {
                     return@observe
                 }
 

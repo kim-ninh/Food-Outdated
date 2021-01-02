@@ -21,10 +21,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.findNavController
@@ -33,6 +31,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.FutureTarget
 import com.google.android.material.snackbar.Snackbar
 import com.ninh.foodoutdated.AlarmUtils
 import com.ninh.foodoutdated.FoodOutdatedApplication
@@ -49,13 +48,19 @@ import com.ninh.foodoutdated.extensions.*
 import com.ninh.foodoutdated.viewmodels.ProductViewModel
 import com.ninh.foodoutdated.viewmodels.ProductsViewModel
 import com.orhanobut.logger.Logger
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ExecutionException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
     View.OnFocusChangeListener,
-    Toolbar.OnMenuItemClickListener{
+    Toolbar.OnMenuItemClickListener,
+    ActionMode.Callback {
 
     private val args: EditProductFragmentArgs by navArgs()
 
@@ -91,39 +96,38 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
     private var actionMode: ActionMode? = null
 
-    private var actionModeCallback: ActionMode.Callback = object : ActionMode.Callback {
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            return when (item.itemId) {
-                R.id.confirm_button -> {
-                    productNameChangeConfirmed = true
-                    actionMode?.finish()
-                    true
-                }
-                else -> false
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem) =
+        when (item.itemId) {
+            R.id.confirm_button -> {
+                productNameChangeConfirmed = true
+                actionMode?.finish()
+                true
             }
+            else -> false
         }
 
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            val inflater = mode.menuInflater
-            inflater.inflate(R.menu.edit_name, menu)
-            return true
-        }
 
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.title = "Edit name"
-            return true
-        }
+    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+        val inflater = mode.menuInflater
+        inflater.inflate(R.menu.edit_name, menu)
+        return true
+    }
 
-        override fun onDestroyActionMode(mode: ActionMode) {
-            actionMode = null
-            if (binding.name.isFocused) {
-                binding.name.clearFocus()
-            }
+    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+        mode.title = "Edit name"
+        return true
+    }
+
+    override fun onDestroyActionMode(mode: ActionMode) = with(binding) {
+        actionMode = null
+        if (name.isFocused) {
+            name.clearFocus()
         }
     }
 
-    open fun inflateToolbarMenu() {
-        binding.toolbar.inflateMenu(R.menu.delete_product)
+
+    open fun inflateToolbarMenu() = with(binding) {
+        toolbar.inflateMenu(R.menu.delete_product)
     }
 
     open fun loadProductFromDB() {
@@ -140,7 +144,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         (EditProductFragmentDirections)::actionEditProductFragmentToDatePickerFragment
 
     private fun getActionToDatePickerFragment(productViewModel: ProductViewModel): NavDirections =
-        with(productViewModel){
+        with(productViewModel) {
             actionToDatePickerFragmentFunc.invoke(expiry.value!!)
         }
 
@@ -148,7 +152,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         (EditProductFragmentDirections)::actionEditProductFragmentToNumberPickerFragment
 
     private fun getActionToNumberPickerFragment(productViewModel: ProductViewModel): NavDirections =
-        with(productViewModel){
+        with(productViewModel) {
             actionToNumberPickerFragmentFunc.invoke(1, 10, quantity.value!!)
         }
 
@@ -156,7 +160,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         (EditProductFragmentDirections)::actionEditProductFragmentToReminderPickerFragment
 
     private fun getActionToReminderPickerFragment(productViewModel: ProductViewModel): NavDirections =
-        with(productViewModel){
+        with(productViewModel) {
             val expiry = expiry.value!!
             val triggerDate = reminder.value!!
             val repeatingType = productAndRemindInfo.value!!.remindInfo.repeating
@@ -194,23 +198,21 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             toolbar.setOnMenuItemClickListener(this@EditProductFragment)
             inflateToolbarMenu()
 
-            val actions = arrayOf(
-                this@EditProductFragment::getActionToProductThumbActionFragment,
-                this@EditProductFragment::getActionToNumberPickerFragment,
-                this@EditProductFragment::getActionToDatePickerFragment,
-                this@EditProductFragment::getActionToReminderPickerFragment
+            val viewActionPairs = listOf(
+                thumbnail to this@EditProductFragment::getActionToProductThumbActionFragment,
+                content.quantity to this@EditProductFragment::getActionToNumberPickerFragment,
+                content.expiry to this@EditProductFragment::getActionToDatePickerFragment,
+                content.reminder to this@EditProductFragment::getActionToReminderPickerFragment
             )
 
-            arrayOf(thumbnail, content.quantity, content.expiry, content.reminder)
-                .forEachIndexed { index, view ->
-                    view.setOnClickListener {
-                        val action = actions[index].invoke(productViewModel)
-                        it.findNavController().navigate(action)
-                    }
+            viewActionPairs.forEach { (view, action) ->
+                view.setOnClickListener {
+                    it.findNavController().navigate(action(productViewModel))
                 }
+            }
 
             name.setOnEditorActionListener { _, actionId, _ ->
-                return@setOnEditorActionListener when (actionId) {
+                when (actionId) {
                     EditorInfo.IME_ACTION_DONE -> {
                         productNameChangeConfirmed = true
                         name.clearFocus()
@@ -258,9 +260,9 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
         }
 
         val navBackStackEntry = getThisBackStackEntry(navController)
-
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
+        navBackStackEntry.viewModelStore
+        val onResumeObserver = object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner): Unit =
                 with(navBackStackEntry.savedStateHandle) {
                     if (contains(DatePickerFragment.KEY_PICKED_DATE)) {
                         val pickedDate = pop<Calendar>(DatePickerFragment.KEY_PICKED_DATE)!!
@@ -289,16 +291,17 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
                         productViewModel.setReminder(remindInfo)
                     }
                 }
-            }
+
         }
 
-        navBackStackEntry.lifecycle.addObserver(observer)
+        val onDestroyObserver = object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner): Unit =
+                navBackStackEntry.lifecycle.removeObserver(onResumeObserver)
 
-        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_DESTROY) {
-                navBackStackEntry.lifecycle.removeObserver(observer)
-            }
-        })
+        }
+
+        navBackStackEntry.lifecycle.addObserver(onResumeObserver)
+        viewLifecycleOwner.lifecycle.addObserver(onDestroyObserver)
 
         loadProductFromDB()
     }
@@ -318,7 +321,7 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
 
                 if (actionMode == null) {
                     actionMode = (requireActivity() as AppCompatActivity).startSupportActionMode(
-                        actionModeCallback
+                        this@EditProductFragment
                     )
                 }
                 actionMode?.invalidate()
@@ -359,8 +362,9 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             val imageUri: Uri = data!!.data!!
             val photoFile = createImageFile()
 
-            decodeBitmapAndSave(imageUri, photoFile) {
-                this.photoFile = photoFile
+            lifecycleScope.launch {
+                decodeBitmapAndSave(imageUri, photoFile)
+                this@EditProductFragment.photoFile = photoFile
                 productViewModel.setThumb(photoFile)
             }
         }
@@ -370,9 +374,11 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             val resizedPhotoFile = createImageFile()
 
             val photoUri = this.photoUri!!
-            decodeBitmapAndSave(photoUri, resizedPhotoFile) {
+
+            lifecycleScope.launch {
+                decodeBitmapAndSave(photoUri, resizedPhotoFile)
                 fullSizePhotoFile?.delete()
-                this.photoFile = resizedPhotoFile
+                this@EditProductFragment.photoFile = resizedPhotoFile
                 productViewModel.setThumb(resizedPhotoFile)
             }
         }
@@ -405,6 +411,46 @@ open class EditProductFragment : Fragment(R.layout.fragment_edit_product),
             .fallback(placeholderThumbnail)
             .centerCrop()
             .into(binding.thumbnail)
+    }
+
+    private suspend fun decodeBitmapAndSave(
+        uri: Uri,
+        file: File
+    ): Unit = withContext(Dispatchers.IO) {
+
+        val futureTarget = Glide.with(this@EditProductFragment)
+            .asBitmap()
+            .load(uri)
+            .centerInside()
+            .submit(1080, 1080)
+
+        val bitmap = decodeBitmap(futureTarget)
+        FileOutputStream(file).use {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, it)
+        }
+
+        Glide.with(this@EditProductFragment).clear(futureTarget)
+    }
+
+    private suspend fun decodeBitmap(
+        futureTarget: FutureTarget<Bitmap>
+    ) = suspendCancellableCoroutine<Bitmap> { cont ->
+        val future = executorService.submit {
+            try {
+                val bitmap = futureTarget.get()
+                cont.resume(bitmap)
+            } catch (ce: CancellationException) {
+                cont.resumeWithException(ce)
+            } catch (ee: ExecutionException) {
+                cont.resumeWithException(ee)
+            } catch (ie: InterruptedException) {
+                cont.resumeWithException(CancellationException())
+            }
+        }
+
+        cont.invokeOnCancellation {
+            future.cancel(true)
+        }
     }
 
     private fun decodeBitmapAndSave(uri: Uri, file: File, uiCallback: () -> Unit) {

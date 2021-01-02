@@ -35,33 +35,32 @@ class AddProductFragment : EditProductFragment() {
     override fun getThisBackStackEntry(navController: NavController) =
         navController.getBackStackEntry(R.id.addProductFragment)
 
-    override fun onMenuItemClick(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.item_add -> {
-                if (validate()) {
-                    productsViewModel
-                        .insert(productViewModel.productAndRemindInfo.value!!)
-                        .observe(this) { newId ->
-                            Log.i(
-                                TAG,
-                                "product inserted, id: $newId"
-                            )
-                            val remindInfo = productViewModel.productAndRemindInfo.value!!.remindInfo
-                            AlarmUtils.add(requireContext(), remindInfo)
-                            findNavController()
-                                .previousBackStackEntry
-                                ?.savedStateHandle
-                                ?.set(KEY_IS_ADD_SUCCESSFUL, true)
-                            findNavController().navigateUp()
-                        }
-                } else {
-                    findNavController().navigateUp()
-                }
-                true
+    override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.item_add -> {
+            if (validate()) {
+                productsViewModel
+                    .insert(productViewModel.productAndRemindInfo.value!!)
+                    .observe(this) { newId ->
+                        Log.i(
+                            TAG,
+                            "product inserted, id: $newId"
+                        )
+                        val remindInfo = productViewModel.productAndRemindInfo.value!!.remindInfo
+                        AlarmUtils.add(requireContext(), remindInfo)
+                        findNavController()
+                            .previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(KEY_IS_ADD_SUCCESSFUL, true)
+                        findNavController().navigateUp()
+                    }
+            } else {
+                findNavController().navigateUp()
             }
-            else -> false
+            true
         }
+        else -> false
     }
+
 
     override fun onDestroyImp() = Unit
 

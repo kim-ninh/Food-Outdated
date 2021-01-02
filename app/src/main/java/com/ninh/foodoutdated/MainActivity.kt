@@ -10,6 +10,7 @@ import androidx.navigation.findNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ninh.foodoutdated.databinding.ActivityMainBinding
 import com.ninh.foodoutdated.editproduct.EditProductFragmentDirections
+import com.ninh.foodoutdated.extensions.getResourceNameOrNull
 import com.ninh.foodoutdated.mainlist.ProductsFragmentDirections
 
 import com.orhanobut.logger.Logger
@@ -27,18 +28,15 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            val dest: String = try {
-                resources.getResourceName(destination.id)
-            }catch (e: Resources.NotFoundException){
-                Integer.toString(destination.id)
-            }
+
+            val dest = resources.getResourceNameOrNull(destination.id)
+                ?: destination.id
 
             Logger.d("Navigated to $dest")
 
-            if (destination.id == R.id.productsFragment){
-                floatingActionButton.visibility = View.VISIBLE
-            }else{
-                floatingActionButton.visibility = View.GONE
+            floatingActionButton.visibility = when(destination.id){
+                R.id.productsFragment -> View.VISIBLE
+                else -> View.GONE
             }
         }
 

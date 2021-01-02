@@ -3,6 +3,7 @@ package com.ninh.foodoutdated.dialogfragments
 import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -29,6 +30,8 @@ class ProductThumbActionFragment: DialogFragment() {
         return MaterialAlertDialogBuilder(requireActivity())
             .setTitle("Modify Image")
             .setAdapter(ProductImageActionAdapter(productThumbActions)){_, which ->
+                val viewModelStore = findNavController().previousBackStackEntry?.viewModelStore!!
+                ViewModelProvider(viewModelStore, ViewModelProvider.NewInstanceFactory())
                 findNavController().previousBackStackEntry?.savedStateHandle?.apply {
                     set(KEY_THUMB_ACTION_INDEX, which)
                 }
